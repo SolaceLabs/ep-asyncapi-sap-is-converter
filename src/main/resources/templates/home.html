@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solace Event Portal - SAP IS Integrator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/scripts/converter-action-scripts.js"></script>
+</head>
+<body>
+
+
+</div>
+<header class="bg-primary py-3 header">
+    <div class="container d-flex align-items-center justify-content-center">
+        <img src="/images/solace-logo.png"/>
+        <h1>Solace Event Portal - SAP IS Integrator</h1>
+        <img src="/images/sap-logo.png"/>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="container-fluid my-5">
+    <div class="row">
+        <div class="col-sm-10">
+            <div class="container-box">
+                <h4>Step 1 - EP Token validation</h4>
+                <div class="row align-items-center">
+                    <form id="epTokenForm" class="d-flex flex-wrap align-items-center"
+                          th:action="@{/validateUserEPToken}" method="post">
+                        <label for="epToken" class="col-sm-3 col-form-label align-self-center">Solace Event Portal
+                            Token</label>
+                        <div class="col-sm-8">
+                            <div class="position-relative">
+                                <textarea class="form-control" id="epToken" rows="5"
+                                          data-bs-toggle="popover" th:field="${epTokenModel.epToken}"
+                                          data-bs-content="Enter your Solace Event Portal Token here"></textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button type="button" class="btn btn-secondary" onclick="cancelEpForm()">Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">Validate token</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                        <div class="col-sm-5 extraTopPadding" th:if="${isUserEpTokenValidated != null}">
+                        <div th:class="${isUserEpTokenValidated ? 'alert alert-success' : 'alert alert-danger'}"
+                             role="alert">
+                            <span th:text="${isUserEpTokenValidated ? 'Token validated successfully!' : 'Failed to validate token.'}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row" th:if="${isUserEpTokenValidated}">
+        <div class="col-sm-4" th:if="${applicationDomainDTOList != null}">
+            <div class="container-box">
+                <h4>Step 2 - Select Application Domain</h4>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Application Domain Name</th>
+                        <th>Application Domain Description</th>
+                        <th>Select</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="applicationDomainDTO, index : ${applicationDomainDTOList}">
+                        <td th:text="${index.index + 1}"></td>
+                        <td th:text="${applicationDomainDTO.name}"></td>
+                        <td th:text="${applicationDomainDTO.description}"></td>
+                        <td>
+                            <input type="radio" name="applicationDomain" th:value="${applicationDomainDTO.id}"
+                                   th:data-app-domain-id="${applicationDomainDTO.id}"
+                                   th:data-app-domain-name="${applicationDomainDTO.name}"
+                                   onclick="getAppsForAppDomainId(this)"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="col-sm-4 applicationTable hidden">
+            <div class="container-box">
+                <h4>Step 3 - Select Application</h4>
+                <p class="EpAppDomainNameText"></p>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Application Name</th>
+                        <th>No.of Versions</th>
+                        <th>Select</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-sm-4 applicationVersionTable hidden">
+            <div class="container-box">
+                <h4>Step 4 - Select Version for SAP IS export</h4>
+                <p class="EPAppNameText"></p>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Version</th>
+                        <th>Version State</th>
+                        <th>Download IS artefact</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-3">
+    <div class="container">
+        <div class="mt-5 p-4 bg-dark text-white">
+            <div class="row">
+                <div class="col-md-4">
+                    <li>
+                        Products
+                        <ul class="sub-menu">
+                            <li><a href="https://solace.com/products/platform/">PubSub+ Platform</a></li>
+                            <li><a href="https://solace.com/products/event-broker/">PubSub+ Event Broker</a></li>
+                            <li><a href="https://solace.com/products/portal/">PubSub+ Event Portal</a></li>
+                        </ul>
+                    </li>
+                </div>
+
+                <div class="col-md-4">
+                    <li>
+                        Tool support
+                        <ul class="sub-menu">
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/blob/master/README.md">How
+                                to use</a></li>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator">Github link</a></li>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/issues">Report issue</a>
+                            </li>
+                        </ul>
+                    </li>
+                </div>
+
+                <div class="col-md-4">
+                    <li>Solace Developers and Community
+                        <ul class="sub-menu">
+                            <li><a target="_blank" rel="noopener" href="https://docs.solace.com/">Docs</a></li>
+                            <li><a target="_blank" rel="noopener" href="https://tutorials.solace.dev/">API Tutorials</a>
+                            </li>
+                            <li><a target="_blank" rel="noopener" href="https://solace.dev/">Dev Portal</a></li>
+                            <li><a target="_blank" rel="noopener" href="https://codelabs.solace.dev/">Codelabs</a></li>
+                            <li><a href="https://solace.community/">Community</a></li>
+                        </ul>
+                    </li>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+</footer>
+
+<!-- Bootstrap JS (optional, if you need JavaScript components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

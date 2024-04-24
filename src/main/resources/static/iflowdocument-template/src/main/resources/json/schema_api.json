@@ -1,0 +1,40 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "<SCHEMA_NAME>",
+    "description": "Converted from json schema"
+  },
+  "host": "dummy.swagger.io",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Converted from json schema",
+        "operationId": "<SCHEMA_NAME>",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "<SCHEMA_NAME>",
+            "schema": {
+              "title": "<SCHEMA_NAME>",
+              "type": "object",
+              "properties": <SCHEMA_PROPERTIES>
+            }
+          }
+        }
+      }
+    }
+  }
+}

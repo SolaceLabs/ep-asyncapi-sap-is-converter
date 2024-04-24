@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: ep-asyncapi-sap-is-converter
+  config.activate.on-profile: default
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+server:
+  port: 9003
+
+solace:
+  api:
+    v0:
+      token-permission-url: https://api.solace.cloud/api/v0/token/permissions
+    ep:
+      authTokenType: "APIToken"
+      basePath: "https://api.solace.cloud"
+logging:
+  level:
+    ep.asyncapi.tool.sap.is.converter: debug
+    com.solace.cloud.ep.designer: debug

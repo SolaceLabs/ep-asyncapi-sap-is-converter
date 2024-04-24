@@ -1,0 +1,9 @@
+<brick gid="0" path="/__$$DuMmY_RoOt$$__/<NAME_OF_PROPERTY>" type="Dst">
+    <viewData x="200" y="40"/>
+    <arg>
+        <brick gid="0" path="/__$$DuMmY_RoOt$$__/<NAME_OF_PROPERTY>" type="Src">
+            <viewData x="50" y="40"/>
+        </brick>
+    </arg>
+    <group/>
+</brick>
