@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 SAP-RuntimeProfile: iflmap
 Bundle-SymbolicName: <APP_NAME>; singleton:=true
 Bundle-Name: <APP_NAME>
-Bundle-Version: <APP_VERSION_ID>
+Bundle-Version: <APP_SEMANTIC_VERSION_ID>
 Bundle-ManifestVersion: 2
 Origin-Bundle-SymbolicName: <APP_NAME>
 Import-Package: com.sap.esb.application.services.cxf.interceptor,com.s

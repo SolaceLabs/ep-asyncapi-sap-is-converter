@@ -244,12 +244,12 @@ public class SapIFlowConverter {
         }
     }
 
-    public void createMetaInfFolderAndFiles(final String appName, final String appVersionId, final File mainDirectory) {
+    public void createMetaInfFolderAndFiles(final String appName, final String appSemanticVersion, final File mainDirectory) {
         try {
             File metaInfSubDirectory = new File(mainDirectory, "META-INF");
             FileUtils.forceMkdir(metaInfSubDirectory);
 
-            final String metaInfFileContent = generateMetaInfFileContent(appName, appVersionId);
+            final String metaInfFileContent = generateMetaInfFileContent(appName, appSemanticVersion);
             final File metaInfFile = new File(metaInfSubDirectory, "MANIFEST.MF");
             FileUtils.writeStringToFile(metaInfFile, metaInfFileContent, StandardCharsets.UTF_8);
         } catch (IOException ioException) {
@@ -257,12 +257,12 @@ public class SapIFlowConverter {
         }
     }
 
-    private String generateMetaInfFileContent(final String appName, final String appVersionId) {
+    private String generateMetaInfFileContent(final String appName, final String appSemanticVersion) {
         try {
             final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.META_INF_FILE_PATH);
             String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             templateContent = templateContent.replace("<APP_NAME>", appName);
-            templateContent = templateContent.replace("<APP_VERSION_ID>", appVersionId);
+            templateContent = templateContent.replace("<APP_SEMANTIC_VERSION_ID>", appSemanticVersion);
             return templateContent;
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.generateMetaInfFileContent", exception);
@@ -285,7 +285,7 @@ public class SapIFlowConverter {
         try {
             final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.META_INFO_PROP_FILE_PATH);
             String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            templateContent = templateContent.replace("<APP_VERSION_ID>", "1.0.1");
+            templateContent = templateContent.replace("<APP_VERSION_ID>", appVersionId);
             templateContent = templateContent.replace("<DATE_TIME_STAMP>", generateDateTimeStamp());
             return templateContent;
         } catch (Exception exception) {

@@ -107,6 +107,7 @@ public class EpActionsService {
 
             MapMuleDoc mapMuleDoc = AsyncApiToMuleDocMapper.mapMuleDocFromAsyncApi(asyncApiSpecForAppVersion);
             final String appVersionTitle = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
+            final String appSemanticVersion = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
 
             //create temp directory
             final File mainDirectory = new File(appVersionTitle);
@@ -129,7 +130,7 @@ public class EpActionsService {
             //metaInfo.prop
             sapIFlowConverter.createMetaInfoPropFile(appVersionId, mainDirectory);
             //meta-inf folder
-            sapIFlowConverter.createMetaInfFolderAndFiles(appVersionTitle, appVersionId, mainDirectory);
+            sapIFlowConverter.createMetaInfFolderAndFiles(appVersionTitle, appSemanticVersion, mainDirectory);
             //resources/parameters prop
             sapIFlowConverter.createParametersProp(resourcesSubDirectory);
             //resources/parameters-propdef
