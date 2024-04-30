@@ -14,7 +14,8 @@ public class SolaceCloudV0APIClient {
     @Value("${solace.api.v0.token-permission-url}")
     private String SOLACE_V0_TOKEN_PERMISSIONS_URL;
 
-    public HttpStatus validateUserEPToken(final String userEpToken) {
+    // public HttpStatus validateUserEPToken(final String userEpToken) {
+    public HttpStatusCode validateUserEPToken(final String userEpToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(userEpToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -27,6 +28,5 @@ public class SolaceCloudV0APIClient {
             return HttpStatus.UNAUTHORIZED;
         }
     }
-
 
 }

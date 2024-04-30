@@ -16,6 +16,7 @@ import org.openapitools.client.model.Application;
 import org.openapitools.client.model.ApplicationDomain;
 import org.openapitools.client.model.ApplicationVersion;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -49,7 +50,8 @@ public class EpActionsService {
 
     public boolean validateUserEPToken(final String userEpToken) {
         if (StringUtils.hasText(userEpToken)) {
-            HttpStatus epTokenValidationStatusCode = solaceCloudV0APIClient.validateUserEPToken(userEpToken);
+            // HttpStatus epTokenValidationStatusCode = solaceCloudV0APIClient.validateUserEPToken(userEpToken);
+            HttpStatusCode epTokenValidationStatusCode = solaceCloudV0APIClient.validateUserEPToken(userEpToken);
             if (epTokenValidationStatusCode == HttpStatus.OK) {
                 log.info("User EP Token input validated");
                 return true;
@@ -110,6 +112,7 @@ public class EpActionsService {
             final String appSemanticVersion = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
 
             //create temp directory
+            // TODO - Create main directory as system tmp directory
             final File mainDirectory = new File(appVersionTitle);
             FileUtils.forceMkdir(mainDirectory);
 
@@ -164,6 +167,7 @@ public class EpActionsService {
         return zipFile;
     }
 
+    // TODO - Validate zipping mechanism
     private void zip(File directory, String baseName, ZipOutputStream zos) throws IOException {
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {

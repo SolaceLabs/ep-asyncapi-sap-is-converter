@@ -7,6 +7,7 @@ import ep.asyncapi.tool.sap.is.converter.models.ApplicationDomainDTO;
 import ep.asyncapi.tool.sap.is.converter.models.ApplicationVersionDTO;
 import ep.asyncapi.tool.sap.is.converter.models.EpTokenModel;
 import ep.asyncapi.tool.sap.is.converter.service.EpActionsService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpSession;
+// import javax.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class EpAsyncAPIConverterController {
     @PostMapping("/validateUserEPToken")
     public String validateUserEPToken(final HttpSession httpSession, final Model model, EpTokenModel epTokenModel) {
         final String epToken = epTokenModel.getEpToken();
+        
         log.debug("Validating user EP token input:{}", epToken);
         if (StringUtils.hasText(epToken)) {
             boolean isUserEpTokenValidated = epActionsService.validateUserEPToken(epToken);
