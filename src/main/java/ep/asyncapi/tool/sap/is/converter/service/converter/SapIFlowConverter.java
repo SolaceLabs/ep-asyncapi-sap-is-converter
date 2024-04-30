@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solace.ep.muleflow.mapper.model.MapMuleDoc;
 import com.solace.ep.muleflow.mapper.model.SchemaInstance;
+import com.solace.ep.muleflow.mapper.sap.iflow.SapIFlowGenerator;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +39,17 @@ public class SapIFlowConverter {
     private void createAndAddIntegrationFlowFiles(File integrationFlowSubDirectory, MapMuleDoc mapMuleDoc) {
         try {
             final String integrationFlowFileContent = generateIntegrationFlowFileContent(mapMuleDoc);
-            final File integarationFlowFile = new File(integrationFlowSubDirectory, "DUMMY_IFLW_FILE_NAME.iflw");
+            // final File integarationFlowFile = new File(integrationFlowSubDirectory, "DUMMY_IFLW_FILE_NAME.iflw");
+            String title = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
+            final String version = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
+            if (title != null) {
+                title = title.replace(" ", "");
+            } else {
+                title = "";
+            }
+            final String iFlowFilename =
+                    ( title.isBlank() ? "NAME_NOT_FOUND" : title ) + ( version == null ? "" : ( "_" + version ) ) + ".iflw";
+            final File integarationFlowFile = new File(integrationFlowSubDirectory, iFlowFilename);
             FileUtils.writeStringToFile(integarationFlowFile, integrationFlowFileContent, StandardCharsets.UTF_8);
         } catch (final IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createAndAddIntegrationFlowFiles", ioException);
@@ -47,7 +59,8 @@ public class SapIFlowConverter {
     private String generateIntegrationFlowFileContent(final MapMuleDoc mapMuleDoc) {
         try {
             // Todo: Call the actual method for generating the iflow document content
-            return "DUMMY_IFLOW_CONTENT";
+            // return "DUMMY_IFLOW_CONTENT";
+            return SapIFlowGenerator.getSapIflowFromMapDoc(mapMuleDoc);
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.generateIntegrationFlowFileContent", exception);
             return StringUtils.EMPTY;

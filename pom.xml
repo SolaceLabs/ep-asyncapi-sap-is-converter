@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>3.2.5</version>
         <relativePath/>
     </parent>
     <groupId>ep.asyncapi.tool.sap.is</groupId>
@@ -24,8 +24,13 @@
             <organization>Solace</organization>
             <organizationUrl>https://solace.com/</organizationUrl>
         </developer>
+        <developer>
+            <name>Dennis Brinley</name>
+            <email>Dennis.Brinley@Solace.com</email>
+            <organization>Solace</organization>
+            <organizationUrl>https://solace.com/</organizationUrl>
+        </developer>
     </developers>
-
 
     <dependencies>
         <dependency>
@@ -60,17 +65,17 @@
         <dependency>
             <groupId>com.solace.ep.muleflow</groupId>
             <artifactId>solace-ep-muleflow</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.5</version>
             <scope>system</scope>
-            <systemPath>${basedir}/src/libs/solace/solace-ep-mule/solace-ep-muleflow-1.0.4-jar-with-dependencies.jar</systemPath>
+            <systemPath>${basedir}/src/libs/solace/solace-ep-mule/solace-ep-muleflow-1.0.5-jar-with-dependencies.jar</systemPath>
         </dependency>
 
         <!--AsyncAPI library-->
-        <dependency>
+        <!-- <dependency>
             <groupId>com.asyncapi</groupId>
             <artifactId>asyncapi-core</artifactId>
             <version>1.0.0-EAP-2</version>
-        </dependency>
+        </dependency> -->
 
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -101,6 +106,7 @@
             <artifactId>instancio-junit</artifactId>
             <version>LATEST</version>
         </dependency>
+        <!-- TODO - Evaluate included dependencies vis-a-vis inherited from libs -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -111,11 +117,11 @@
             <artifactId>jackson-core</artifactId>
             <version>2.16.1</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.8</version>
-        </dependency>
+            <version>2.10.1</version>
+        </dependency> -->
         <dependency>
             <groupId>io.gsonfire</groupId>
             <artifactId>gson-fire</artifactId>
