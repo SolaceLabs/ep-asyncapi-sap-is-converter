@@ -37,6 +37,7 @@ public class EpActionsService {
     private final ApplicationDomainApiClientService applicationDomainApiClientService;
     private final ApplicationApiClientService applicationApiClientService;
     private final SapIFlowConverter sapIFlowConverter;
+    private int runCount = 0;
 
     public EpActionsService(final SolaceCloudV0APIClient solaceCloudV0APIClient,
                             final ApplicationDomainApiClientService applicationDomainApiClientService,
@@ -111,10 +112,12 @@ public class EpActionsService {
             final String appVersionTitle = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
             final String appSemanticVersion = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
 
-            //create temp directory
-            // TODO - Create main directory as system tmp directory
-            final File mainDirectory = new File(appVersionTitle);
+            final File tmpDirectory = FileUtils.getTempDirectory();
+
+            final File mainDirectory = new File(tmpDirectory, appVersionTitle + "_" + runCount++);
             FileUtils.forceMkdir(mainDirectory);
+
+            log.info( "Creating project structure in system temp directory: {}", mainDirectory.getAbsolutePath() );
 
             final File resourcesSubDirectory = new File(mainDirectory, "src/main/resources");
             FileUtils.forceMkdir(resourcesSubDirectory);
@@ -162,16 +165,20 @@ public class EpActionsService {
     private File createZipFile(File directory) throws IOException {
         File zipFile = new File(directory.getParent(), directory.getName() + ".zip");
         try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
-            zip(directory, directory.getName(), zos);
+            // zip(directory, directory.getName(), zos);
+            zip(directory, "", zos);
         }
         return zipFile;
     }
 
     // TODO - Validate zipping mechanism
     private void zip(File directory, String baseName, ZipOutputStream zos) throws IOException {
+        // log.info( "Basename: {}", baseName );
         for (File file : directory.listFiles()) {
+            // log.info( "Zipping: {}", file.getAbsolutePath() );
+            // log.info( "Zipping: {}", file.getName());
             if (file.isDirectory()) {
-                zip(file, baseName + File.separator + file.getName(), zos);
+                zip(file, ( baseName.length() > 0 ? ( baseName + File.separator) : "" ) + file.getName(), zos);
             } else {
                 byte[] buffer = new byte[1024];
                 try (FileInputStream fis = new FileInputStream(file)) {

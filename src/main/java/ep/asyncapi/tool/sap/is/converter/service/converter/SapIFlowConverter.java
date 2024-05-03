@@ -39,16 +39,8 @@ public class SapIFlowConverter {
     private void createAndAddIntegrationFlowFiles(File integrationFlowSubDirectory, MapMuleDoc mapMuleDoc) {
         try {
             final String integrationFlowFileContent = generateIntegrationFlowFileContent(mapMuleDoc);
-            // final File integarationFlowFile = new File(integrationFlowSubDirectory, "DUMMY_IFLW_FILE_NAME.iflw");
-            String title = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
-            final String version = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
-            if (title != null) {
-                title = title.replace(" ", "");
-            } else {
-                title = "";
-            }
-            final String iFlowFilename =
-                    ( title.isBlank() ? "NAME_NOT_FOUND" : title ) + ( version == null ? "" : ( "_" + version ) ) + ".iflw";
+            String title = mapMuleDoc.getGlobalProperties().getOrDefault("epApplicationVersionTitle", "");
+            final String iFlowFilename = ( title.isBlank() ? "NAME_NOT_FOUND" : title ) + ".iflw";
             final File integarationFlowFile = new File(integrationFlowSubDirectory, iFlowFilename);
             FileUtils.writeStringToFile(integarationFlowFile, integrationFlowFileContent, StandardCharsets.UTF_8);
         } catch (final IOException ioException) {
@@ -58,8 +50,6 @@ public class SapIFlowConverter {
 
     private String generateIntegrationFlowFileContent(final MapMuleDoc mapMuleDoc) {
         try {
-            // Todo: Call the actual method for generating the iflow document content
-            // return "DUMMY_IFLOW_CONTENT";
             return SapIFlowGenerator.getSapIflowFromMapDoc(mapMuleDoc);
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.generateIntegrationFlowFileContent", exception);
@@ -83,7 +73,8 @@ public class SapIFlowConverter {
     private void createAndAddSourceToDestinationFormatMmapFile(final File mappingSubDirectory, final String messageName, final SchemaInstance schemaInstance) {
         try {
             final String sourceToDestinationFormatMmapFileContent = generateSourceToDestinationFormatMmapFileContent(schemaInstance);
-            final File sourceToDestinationFormatMmapFile = new File(mappingSubDirectory, messageName + "SourceToDestinationFormat.mmap");
+            // final File sourceToDestinationFormatMmapFile = new File(mappingSubDirectory, messageName + "SourceToDestinationFormat.mmap");
+            final File sourceToDestinationFormatMmapFile = new File(mappingSubDirectory, String.format("SourceFormatTo%s.mmap", schemaInstance.getName()));
             FileUtils.writeStringToFile(sourceToDestinationFormatMmapFile, sourceToDestinationFormatMmapFileContent, StandardCharsets.UTF_8);
         } catch (final IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createAndAddSourceToDestinationFormatMmapFile", ioException);
@@ -275,6 +266,7 @@ public class SapIFlowConverter {
             final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.META_INF_FILE_PATH);
             String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             templateContent = templateContent.replace("<APP_NAME>", appName);
+            templateContent = templateContent.replace("<APP_SYMBOLIC_NAME>", appName.replace(" ", "_"));
             templateContent = templateContent.replace("<APP_SEMANTIC_VERSION_ID>", appSemanticVersion);
             return templateContent;
         } catch (Exception exception) {
@@ -282,7 +274,6 @@ public class SapIFlowConverter {
             return StringUtils.EMPTY;
         }
     }
-
 
     public void createMetaInfoPropFile(final String appVersionId, final File mainDirectory) {
         try {
