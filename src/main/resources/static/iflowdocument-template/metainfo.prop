@@ -1,3 +1,4 @@
 #Store metainfo properties
 #<DATE_TIME_STAMP>
 description=Generated from Event Portal application version id <APP_VERSION_ID>
+applicationVersionID=<APP_VERSION_ID>
