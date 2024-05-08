@@ -298,6 +298,30 @@ public class SapIFlowConverter {
         }
     }
 
+    public void createReadmeFile(final String appName, final String appSemanticVersion, final String appDescription, final File mainDirectory) {
+      try {
+          final String readme = generateReadmeFileContent(appName, appSemanticVersion, appDescription);
+          File readmeFile = new File(mainDirectory, "README.md");
+          FileUtils.writeStringToFile(readmeFile, readme, StandardCharsets.UTF_8);
+      } catch (IOException ioException) {
+          log.error("Error encountered in SapIFlowConverter.createReadmeFile", ioException);
+      }
+  }
+
+    private String generateReadmeFileContent(final String appName, final String appSemanticVersion, final String appDescription) {
+      try {
+          final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.README_PATH);
+          String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+          templateContent = templateContent.replace("<APP_NAME>", appName);
+          templateContent = templateContent.replace("<APP_SEMANTIC_VERSION_ID>", appSemanticVersion);
+          templateContent = templateContent.replace("<APP_DESCRIPTION>", appDescription);
+          return templateContent;
+      } catch (Exception exception) {
+          log.error("Error encountered in SapIFlowConverter.generateReadmeFileContent", exception);
+          return StringUtils.EMPTY;
+      }
+  }
+
     public void createProjectFile(final String projectName, final File mainDirectory) {
         try {
             final String projectFileContent = generateProjectFileContent(projectName);

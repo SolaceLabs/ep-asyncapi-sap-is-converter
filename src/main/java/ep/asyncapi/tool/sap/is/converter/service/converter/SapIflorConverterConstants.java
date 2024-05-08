@@ -9,6 +9,7 @@ public class SapIflorConverterConstants {
     public static final String
             PROJECT_FILE_PATH = "/static/iflowdocument-template/.project",
             META_INFO_PROP_FILE_PATH = "/static/iflowdocument-template/metainfo.prop",
+            README_PATH = "/static/iflowdocument-template/README.md",
             META_INF_FILE_PATH = "/static/iflowdocument-template/META-INF/MANIFEST.MF",
             PARAMETERS_PROP_FILE_PATH = "/static/iflowdocument-template/src/main/resources/parameters.prop",
             PARAMETERS_PROP_DEF_FILE_PATH = "/static/iflowdocument-template/src/main/resources/parameters.propdef",
