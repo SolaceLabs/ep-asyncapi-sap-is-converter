@@ -111,6 +111,7 @@ public class EpActionsService {
             MapMuleDoc mapMuleDoc = AsyncApiToMuleDocMapper.mapMuleDocFromAsyncApi(asyncApiSpecForAppVersion);
             final String appVersionTitle = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
             final String appSemanticVersion = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
+            final String appDescription = mapMuleDoc.getGlobalProperties().get("epApplicationVersionDescription");
 
             final File tmpDirectory = FileUtils.getTempDirectory();
 
@@ -135,6 +136,8 @@ public class EpActionsService {
             sapIFlowConverter.createProjectFile(appVersionTitle, mainDirectory);
             //metaInfo.prop
             sapIFlowConverter.createMetaInfoPropFile(appVersionId, mainDirectory);
+            // README.md
+            sapIFlowConverter.createReadmeFile(appVersionTitle, appSemanticVersion, appDescription, mainDirectory);
             //meta-inf folder
             sapIFlowConverter.createMetaInfFolderAndFiles(appVersionTitle, appSemanticVersion, mainDirectory);
             //resources/parameters prop
