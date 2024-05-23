@@ -196,6 +196,15 @@ public class SapIFlowConverter {
             String propertiesString = objectMapper.writeValueAsString(propertiesNode);
             String escapedPropertiesString = Matcher.quoteReplacement(propertiesString);
             templateContent = templateContent.replaceAll("<SCHEMA_PROPERTIES>", escapedPropertiesString);
+
+            JsonNode definitionsNode = jsonNode.get("definitions");
+            String escapedDefinitionsString = "{ }";
+            if ( definitionsNode != null ) {
+                String definitionsString = objectMapper.writeValueAsString(definitionsNode);
+                escapedDefinitionsString = Matcher.quoteReplacement(definitionsString);
+            }
+            templateContent = templateContent.replaceAll("<SCHEMA_DEFINITIONS>", escapedDefinitionsString);
+
             return templateContent;
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.generateSchemaApiJsonFileContent", exception);

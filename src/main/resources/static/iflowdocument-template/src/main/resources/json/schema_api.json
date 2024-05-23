@@ -16,6 +16,7 @@
   "produces": [
     "application/json"
   ],
+  "definitions": <SCHEMA_DEFINITIONS>,
   "paths": {
     "/": {
       "get": {
