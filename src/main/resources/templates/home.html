@@ -33,9 +33,8 @@
                             Token</label>
                         <div class="col-sm-8">
                             <div class="position-relative">
-                                <textarea class="form-control" id="epToken" rows="5"
-                                          data-bs-toggle="popover" th:field="${epTokenModel.epToken}"
-                                          data-bs-content="Enter your Solace Event Portal Token here"></textarea>
+                                <input type="password" id="epToken" data-bs-toggle="popover" class="form-control"
+                                       placeholder="Enter your token here" th:field="${epTokenModel.epToken}"/>
                                 <div class="d-flex justify-content-between mt-2">
                                     <button type="button" class="btn btn-secondary" onclick="cancelEpForm()">Cancel
                                     </button>
@@ -44,7 +43,7 @@
                             </div>
                         </div>
                     </form>
-                        <div class="col-sm-5 extraTopPadding" th:if="${isUserEpTokenValidated != null}">
+                    <div class="col-sm-3 extraTopPadding" th:if="${isUserEpTokenValidated != null}">
                         <div th:class="${isUserEpTokenValidated ? 'alert alert-success' : 'alert alert-danger'}"
                              role="alert">
                             <span th:text="${isUserEpTokenValidated ? 'Token validated successfully!' : 'Failed to validate token.'}"></span>

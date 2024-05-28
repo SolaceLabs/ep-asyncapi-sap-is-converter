@@ -56,3 +56,11 @@
 .extraTopPadding {
     padding-top: 10px;
 }
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
