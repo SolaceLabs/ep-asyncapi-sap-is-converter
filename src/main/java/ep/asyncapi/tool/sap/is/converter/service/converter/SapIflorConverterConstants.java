@@ -17,5 +17,7 @@ public class SapIflorConverterConstants {
             RESOURCES_MAPPING_SCHEMA_TEMPLATE = "/static/iflowdocument-template/src/main/resources/mapping/validateSchema.mmap",
             RESOURCES_MAPPING_TRANSFORMATION_BRICK_TEMPLATE = "/static/iflowdocument-template/src/main/resources/mapping/transformationBrickTemplate.xml",
             RESOURCES_MAPPING_TO_DESTINATIONFORMAT_TEMPLATE = "/static/iflowdocument-template/src/main/resources/mapping/toDestinationFormatMmap.xml",
-            RESOURCES_MAPPING_SOURCE_TO_DESTINATIONFORMAT_TEMPLATE = "/static/iflowdocument-template/src/main/resources/mapping/sourceToDestinationFormatMmap.xml";
+            RESOURCES_MAPPING_SOURCE_TO_DESTINATIONFORMAT_TEMPLATE = "/static/iflowdocument-template/src/main/resources/mapping/sourceToDestinationFormatMmap.xml",
+            RESOURCES_SCRIPT_COMPOSE_TOPIC_FILE_PATH = "/static/iflowdocument-template/src/main/resources/script/composeTopic.groovy",
+            RESOURCES_SCRIPT_EXTRACT_FIELD_FILE_PATH = "/static/iflowdocument-template/src/main/resources/script/extractField.groovy";
 }

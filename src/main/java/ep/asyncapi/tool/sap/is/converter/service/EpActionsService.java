@@ -132,6 +132,9 @@ public class EpActionsService {
             final File integrationFlowSubDirectory = new File(resourcesSubDirectory, "scenarioflows/integrationflow");
             FileUtils.forceMkdir(integrationFlowSubDirectory);
 
+            final File scriptSubDirectory = new File(resourcesSubDirectory, "script");
+            FileUtils.forceMkdir(scriptSubDirectory);
+
             //project file:
             sapIFlowConverter.createProjectFile(appVersionTitle, mainDirectory);
             //metaInfo.prop
@@ -154,6 +157,8 @@ public class EpActionsService {
             sapIFlowConverter.createSourceToDestinationFormatMmapFiles(mappingSubDirectory, mapMuleDoc);
             //resources/scenarios/integrationflow
             sapIFlowConverter.createIntegrationFlowFiles(integrationFlowSubDirectory, mapMuleDoc);
+            //resources/script/
+            sapIFlowConverter.createDynamicTopicScriptFiles(scriptSubDirectory);
 
             //create zip file
             final File zipFile = createZipFile(mainDirectory);
