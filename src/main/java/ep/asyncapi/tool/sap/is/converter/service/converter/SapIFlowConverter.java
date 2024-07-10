@@ -355,13 +355,12 @@ public class SapIFlowConverter {
 
     public void createDynamicTopicScriptFiles(final File scriptSubDirectory) {
         try {
-
             final InputStream composeTopicScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_COMPOSE_TOPIC_FILE_PATH);
-            final InputStream extractFieldScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_EXTRACT_FIELD_FILE_PATH);
+            // final InputStream extractFieldScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_EXTRACT_FIELD_FILE_PATH);
             File composeTopicScriptFile = new File(scriptSubDirectory, "composeTopic.groovy");
-            File extractFieldScriptFile = new File(scriptSubDirectory, "extractField.groovy");
+            // File extractFieldScriptFile = new File(scriptSubDirectory, "extractField.groovy");
             FileUtils.copyInputStreamToFile(composeTopicScriptInputStream, composeTopicScriptFile);
-            FileUtils.copyInputStreamToFile(extractFieldScriptInputStream, extractFieldScriptFile);
+            // FileUtils.copyInputStreamToFile(extractFieldScriptInputStream, extractFieldScriptFile);
         } catch (IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createDynamicTopicScriptFiles", ioException);
         }
