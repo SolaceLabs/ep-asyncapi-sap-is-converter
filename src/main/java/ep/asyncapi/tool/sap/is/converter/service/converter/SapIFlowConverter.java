@@ -2,9 +2,9 @@ package ep.asyncapi.tool.sap.is.converter.service.converter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.solace.ep.muleflow.mapper.model.MapMuleDoc;
-import com.solace.ep.muleflow.mapper.model.SchemaInstance;
-import com.solace.ep.muleflow.mapper.sap.iflow.SapIFlowGenerator;
+import com.solace.ep.codegen.internal.model.MapMuleDoc;
+import com.solace.ep.codegen.internal.model.SchemaInstance;
+import com.solace.ep.codegen.sap.iflow.SapIFlowGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

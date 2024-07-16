@@ -1,8 +1,8 @@
 package ep.asyncapi.tool.sap.is.converter.service;
 
 import com.solace.cloud.ep.designer.ApiClient;
-import com.solace.ep.muleflow.mapper.asyncapi.AsyncApiToMuleDocMapper;
-import com.solace.ep.muleflow.mapper.model.MapMuleDoc;
+import com.solace.ep.codegen.asyncapi.mapper.AsyncApiToMuleDocMapper;
+import com.solace.ep.codegen.internal.model.MapMuleDoc;
 import ep.asyncapi.tool.sap.is.converter.models.ApplicationDTO;
 import ep.asyncapi.tool.sap.is.converter.models.ApplicationDomainDTO;
 import ep.asyncapi.tool.sap.is.converter.models.ApplicationVersionDTO;
