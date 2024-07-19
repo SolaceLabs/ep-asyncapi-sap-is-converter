@@ -10,11 +10,13 @@
     </parent>
     <groupId>ep.asyncapi.tool.sap.is</groupId>
     <artifactId>ep-asyncapi-sap-is-converter</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <name>ep-asyncapi-sap-is-converter</name>
     <description>ep-asyncapi-sap-is-converter</description>
     <properties>
         <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <developers>
@@ -132,6 +134,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
