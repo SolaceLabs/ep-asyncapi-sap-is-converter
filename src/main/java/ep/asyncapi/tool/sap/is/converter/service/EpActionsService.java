@@ -1,6 +1,9 @@
 package ep.asyncapi.tool.sap.is.converter.service;
 
 import com.solace.cloud.ep.designer.ApiClient;
+import com.solace.cloud.ep.designer.model.Application;
+import com.solace.cloud.ep.designer.model.ApplicationDomain;
+import com.solace.cloud.ep.designer.model.ApplicationVersion;
 import com.solace.ep.codegen.asyncapi.mapper.AsyncApiToMuleDocMapper;
 import com.solace.ep.codegen.internal.model.MapMuleDoc;
 import ep.asyncapi.tool.sap.is.converter.models.ApplicationDTO;
@@ -12,9 +15,7 @@ import ep.asyncapi.tool.sap.is.converter.service.clients.ApplicationDomainApiCli
 import ep.asyncapi.tool.sap.is.converter.service.converter.SapIFlowConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.openapitools.client.model.Application;
-import org.openapitools.client.model.ApplicationDomain;
-import org.openapitools.client.model.ApplicationVersion;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;

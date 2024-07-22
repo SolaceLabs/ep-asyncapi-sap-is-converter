@@ -1,12 +1,14 @@
 package ep.asyncapi.tool.sap.is.converter.service.clients;
 
 import com.solace.cloud.ep.designer.ApiClient;
-import com.solace.cloud.ep.designer.client.ApplicationsApi;
+
+import com.solace.cloud.ep.designer.api.ApplicationsApi;
+import com.solace.cloud.ep.designer.model.Application;
+import com.solace.cloud.ep.designer.model.ApplicationVersion;
+import com.solace.cloud.ep.designer.model.ApplicationVersionsResponse;
+import com.solace.cloud.ep.designer.model.ApplicationsResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.openapitools.client.model.Application;
-import org.openapitools.client.model.ApplicationVersion;
-import org.openapitools.client.model.ApplicationVersionsResponse;
-import org.openapitools.client.model.ApplicationsResponse;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;

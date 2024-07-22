@@ -1,9 +1,9 @@
 package ep.asyncapi.tool.sap.is.converter.service.clients;
 
 import com.solace.cloud.ep.designer.ApiClient;
-import com.solace.cloud.ep.designer.client.ApplicationDomainsApi;
+import com.solace.cloud.ep.designer.api.ApplicationDomainsApi;
+import com.solace.cloud.ep.designer.model.ApplicationDomain;
 import lombok.extern.slf4j.Slf4j;
-import org.openapitools.client.model.ApplicationDomain;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
