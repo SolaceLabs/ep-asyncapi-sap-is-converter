@@ -44,7 +44,7 @@ public class ApplicationApiClientService {
         }
     }
 
-    public String getAsycnApiSpecForAppVersion(final ApiClient apiClient, final String applicationVersionId) {
+    public String getAsyncApiSpecForAppVersion(final ApiClient apiClient, final String applicationVersionId) {
         applicationsApi = new ApplicationsApi(apiClient);
         try {
             return applicationsApi.getAsyncApiForApplicationVersion(applicationVersionId, "json", null, null, null, null, null);
@@ -53,6 +53,4 @@ public class ApplicationApiClientService {
             return "";
         }
     }
-
-
 }
