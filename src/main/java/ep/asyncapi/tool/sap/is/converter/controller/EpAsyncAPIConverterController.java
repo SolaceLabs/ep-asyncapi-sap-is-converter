@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-// import javax.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,15 +46,16 @@ public class EpAsyncAPIConverterController {
     @PostMapping("/validateUserEPToken")
     public String validateUserEPToken(final HttpSession httpSession, final Model model, EpTokenModel epTokenModel) {
         final String epToken = epTokenModel.getEpToken();
-        
-        log.debug("Validating user EP token input:{}", epToken);
+        log.info("Validating user EP token");
         if (StringUtils.hasText(epToken)) {
             boolean isUserEpTokenValidated = epActionsService.validateUserEPToken(epToken);
             model.addAttribute("isUserEpTokenValidated", isUserEpTokenValidated);
+            log.info("Is User's EP Token validated: {}", isUserEpTokenValidated);
             if (isUserEpTokenValidated) {
                 httpSession.setAttribute("validatedEpToken", epToken);
                 ApiClient apiClient = apiClientUtil.initializeApiClient(epToken);
                 httpSession.setAttribute("apiClient", apiClient);
+                log.info("Retrieving application domains for user token");
                 List<ApplicationDomainDTO> applicationDomainDTOList = epActionsService.getAllApplicationDomains(apiClient);
                 model.addAttribute("applicationDomainDTOList", applicationDomainDTOList);
             }
@@ -71,6 +71,7 @@ public class EpAsyncAPIConverterController {
     @ResponseBody
     public List<ApplicationDTO> getApplicationsForAppDomain(@PathVariable String appDomainId, final HttpSession httpSession) {
         if (StringUtils.hasText(appDomainId)) {
+            log.info("Retrieving applications for user app domain id");
             ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
             return epActionsService.getAllApplicationsForAppDomain(apiClient, appDomainId);
         }
@@ -82,6 +83,7 @@ public class EpAsyncAPIConverterController {
     @ResponseBody
     public List<ApplicationVersionDTO> getVersionsForApplication(@PathVariable final String appDomainId, @PathVariable final String applicationId, final HttpSession httpSession) {
         if (StringUtils.hasText(appDomainId) && StringUtils.hasText(applicationId)) {
+            log.info("Retrieving applications versions for user app id");
             ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
             return epActionsService.getApplicationVersionsForAppId(apiClient, applicationId);
         }
@@ -90,9 +92,7 @@ public class EpAsyncAPIConverterController {
 
     @GetMapping("/{appDomainId}/applications/{appId}/versions/{appVersionId}/isArtefact")
     public ResponseEntity<byte[]> generateISArtefactDownload(@PathVariable final String appDomainId, @PathVariable final String appId, @PathVariable final String appVersionId, final HttpSession httpSession) {
-        log.debug("appDomainId:{}", appDomainId);
-        log.debug("appId:{}", appId);
-        log.debug("appVersionId:{}", appVersionId);
+        log.info("Generating IS artefact for user app version");
         ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
         byte[] appVersionIsWorkflowArtefact = epActionsService.generateISWorkflowArtefactForAppVersion(apiClient, appVersionId);
         HttpHeaders headers = new HttpHeaders();

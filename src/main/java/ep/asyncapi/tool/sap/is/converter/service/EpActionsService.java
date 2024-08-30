@@ -15,7 +15,6 @@ import ep.asyncapi.tool.sap.is.converter.service.clients.ApplicationDomainApiCli
 import ep.asyncapi.tool.sap.is.converter.service.converter.SapIFlowConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -52,7 +51,6 @@ public class EpActionsService {
 
     public boolean validateUserEPToken(final String userEpToken) {
         if (StringUtils.hasText(userEpToken)) {
-            // HttpStatus epTokenValidationStatusCode = solaceCloudV0APIClient.validateUserEPToken(userEpToken);
             HttpStatusCode epTokenValidationStatusCode = solaceCloudV0APIClient.validateUserEPToken(userEpToken);
             if (epTokenValidationStatusCode == HttpStatus.OK) {
                 log.info("User EP Token input validated");
@@ -103,12 +101,10 @@ public class EpActionsService {
 
     public byte[] generateISWorkflowArtefactForAppVersion(final ApiClient apiClient, final String appVersionId) {
         try {
-
             //Get AsyncAPI spec
-            final String asyncApiSpecForAppVersion = applicationApiClientService.getAsycnApiSpecForAppVersion(apiClient, appVersionId);
+            final String asyncApiSpecForAppVersion = applicationApiClientService.getAsyncApiSpecForAppVersion(apiClient, appVersionId);
 
             //Handle AsyncAPI spec
-
             MapMuleDoc mapMuleDoc = AsyncApiToMuleDocMapper.mapMuleDocFromAsyncApi(asyncApiSpecForAppVersion);
             final String appVersionTitle = mapMuleDoc.getGlobalProperties().get("epApplicationVersionTitle");
             final String appSemanticVersion = mapMuleDoc.getGlobalProperties().get("epApplicationVersion");
@@ -119,7 +115,7 @@ public class EpActionsService {
             final File mainDirectory = new File(tmpDirectory, appVersionTitle + "_" + runCount++);
             FileUtils.forceMkdir(mainDirectory);
 
-            log.info( "Creating project structure in system temp directory: {}", mainDirectory.getAbsolutePath() );
+            log.debug("Creating project structure in system temp directory: {}", mainDirectory.getAbsolutePath());
 
             final File resourcesSubDirectory = new File(mainDirectory, "src/main/resources");
             FileUtils.forceMkdir(resourcesSubDirectory);
@@ -174,20 +170,15 @@ public class EpActionsService {
     private File createZipFile(File directory) throws IOException {
         File zipFile = new File(directory.getParent(), directory.getName() + ".zip");
         try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
-            // zip(directory, directory.getName(), zos);
             zip(directory, "", zos);
         }
         return zipFile;
     }
 
-    // TODO - Validate zipping mechanism
     private void zip(File directory, String baseName, ZipOutputStream zos) throws IOException {
-        // log.info( "Basename: {}", baseName );
         for (File file : directory.listFiles()) {
-            // log.info( "Zipping: {}", file.getAbsolutePath() );
-            // log.info( "Zipping: {}", file.getName());
             if (file.isDirectory()) {
-                zip(file, ( baseName.length() > 0 ? ( baseName + File.separator) : "" ) + file.getName(), zos);
+                zip(file, (baseName.length() > 0 ? (baseName + File.separator) : "") + file.getName(), zos);
             } else {
                 byte[] buffer = new byte[1024];
                 try (FileInputStream fis = new FileInputStream(file)) {
