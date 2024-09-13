@@ -3,6 +3,7 @@ package ep.asyncapi.tool.sap.is.converter.service.converter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solace.ep.codegen.internal.model.MapMuleDoc;
+import com.solace.ep.codegen.internal.model.MapSubFlowEgress;
 import com.solace.ep.codegen.internal.model.SchemaInstance;
 import com.solace.ep.codegen.sap.iflow.SapIFlowGenerator;
 
@@ -353,14 +354,74 @@ public class SapIFlowConverter {
         }
     }
 
-    public void createDynamicTopicScriptFiles(final File scriptSubDirectory) {
+    /**
+     * This method will create script files:
+     * - composeTopic.groovy (static)
+     * - topicParameters.groovy -- generated dynamically with topic parameters in code, one script function per event
+     * @param scriptSubDirectory
+     * @param mapMuleDoc
+     */
+    public void createDynamicTopicScriptFiles(final File scriptSubDirectory, MapMuleDoc mapMuleDoc) {
         try {
             final InputStream composeTopicScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_COMPOSE_TOPIC_FILE_PATH);
-            // final InputStream extractFieldScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_EXTRACT_FIELD_FILE_PATH);
             File composeTopicScriptFile = new File(scriptSubDirectory, "composeTopic.groovy");
-            // File extractFieldScriptFile = new File(scriptSubDirectory, "extractField.groovy");
             FileUtils.copyInputStreamToFile(composeTopicScriptInputStream, composeTopicScriptFile);
-            // FileUtils.copyInputStreamToFile(extractFieldScriptInputStream, extractFieldScriptFile);
+            
+            if (mapMuleDoc.getMapEgressSubFlows().isEmpty()) {
+                return;
+            } else {
+                int count = 0;
+                for (MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows() ) {
+                    if (pub.getSetVariables().size() > 0) {
+                        count++;
+                    }
+                }
+                if (count == 0) {
+                    return;
+                }
+            }
+
+            File topicParametersScriptFile = new File(scriptSubDirectory, "topicParameters.groovy");
+            FileUtils.writeStringToFile(topicParametersScriptFile, SapIflorConverterConstants.TOPIC_PARAMETERS_GROOVY_HEADER, "UTF-8", false );
+            int outputChannel = 0;  // , functionCount = 0;
+            for ( MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows() ) {
+                if ( pub.getSetVariables().size() == 0 ) {
+                    outputChannel++;
+                    continue;
+                }
+                if ( pub.isPublishToQueue() ) {
+                    outputChannel++;
+                    continue;
+                }
+                String topicParametersGroovyFx = SapIflorConverterConstants.TOPIC_PARAMETERS_GROOVY_FX;
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(
+                    SapIflorConverterConstants.TP_TOKEN_EVENT_NAME, 
+                    pub.getMessageName() != null ? pub.getMessageName() : "UNKNOWN"
+                );
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(
+                    SapIflorConverterConstants.TP_TOKEN_TOPIC_ADDRESS_PATTERN, 
+                    pub.getPublishAddress() != null ? pub.getPublishAddress() : "UNKNOWN"
+                );
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(
+                    SapIflorConverterConstants.TP_TOKEN_FX_INSTANCE, 
+                    Integer.toString(outputChannel++)
+                );
+                StringBuilder varsList = new StringBuilder();
+                StringBuilder jsonPath = new StringBuilder();
+                StringBuilder setValue = new StringBuilder();
+                int varIndex = 1;
+                for( Map.Entry<String, String> var : pub.getSetVariables().entrySet() ) {
+                    final String topicVar = var.getKey();
+                    varsList.append(String.format(SapIflorConverterConstants.TOPIC_PARAMETERS_VAR_LIST_PATTERN, topicVar));
+                    jsonPath.append(String.format(SapIflorConverterConstants.TOPIC_PARAMETERS_JSON_PATH_PATTERN, topicVar, varIndex));
+                    setValue.append(String.format(SapIflorConverterConstants.TOPIC_PARAMETERS_SET_VALUE_PATTERN, topicVar, varIndex));
+                    varIndex++;
+                }
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_TOPIC_VARS_LIST, varsList.toString());
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_JSON_PATH, jsonPath.toString());
+                topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_SET_VALUE, setValue.toString());
+                FileUtils.writeStringToFile(topicParametersScriptFile, topicParametersGroovyFx, "UTF-8", true);
+            };
         } catch (IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createDynamicTopicScriptFiles", ioException);
         }

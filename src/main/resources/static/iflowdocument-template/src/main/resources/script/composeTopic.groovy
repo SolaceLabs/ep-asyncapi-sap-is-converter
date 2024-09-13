@@ -1,62 +1,78 @@
-/*
-This script will build a topic string with variable elements by extracting
-values from a JSON message body
-- If there are no variable elements in the topic string then then the set value will be passed on
-- If there is no composedTopic pattern then the script will do nothing
-*/
+/**
+ * composeTopic.groovy
+ * ------------------- 
+ * This script will build a topic string with variable elements by extracting
+ *  values from a JSON message body OR by replacing variables with explicit values
+ *  - In general, this script should not require editing
+ *  - This script relies on existing message properties:
+ *    - composedTopic -- Topic pattern with variables enclosed in braces: {var}
+ *    - __topicVarsJsonPath__ -- Map of variable names -> JSON path of value
+ *    - __topicVarsSetValue__ -- Map of variable names -> explicit values
+**/
 import com.sap.gateway.ip.core.customdev.util.Message;
-import java.util.HashMap;
 import groovy.json.JsonSlurper;
 
-def Message processData(Message message) {
-    final GP_TOPICEXP = 'gpath_topicexp_';
-    final GP_TOPICVAL = 'gpath_topicval_';
-    final GP_COMPOSED_PATTERN = "gpath_composedTopicPattern";
-    final COMPOSED_TOPIC = "composedTopic";
-    
+def Message composeTopic(Message message) {
+    final COMPOSED_TOPIC_PROPERTY = 'composedTopic';
+    final TV_JSON_PATH_PROPERTY = '__topicVarsJsonPath__';
+    final TV_SET_VALUE_PROPERTY = '__topicVarsSetValue__';
+
     def properties = message.getProperties();
-    def topicValProperties = new HashMap<String, String>();
-    
+
     try {
-        def composedTopicString = properties.get(GP_COMPOSED_PATTERN);
-        if (composedTopicString == null || composedTopicString.length() == 0) {
-            // This could be an error, or the topic may be set directly on the publisher
-            // (bypass composed topic logic)
+        def composedTopicPattern = properties.get(COMPOSED_TOPIC_PROPERTY);
+        
+        // No topic pattern, nothing to do
+        if (!composedTopicPattern || composedTopicPattern.isEmpty()) {
+            // TODO - Error condition?
             return message;
         }
-        if (!composedTopicString.contains("{")) {
-            // Debug log, static topic detected
-            message.setProperty(COMPOSED_TOPIC, composedTopicString);
+        // No variables in topic pattern, nothing to do
+        if (!composedTopicPattern.contains('{')) {
             return message;
         }
 
-        // Extract dynamic topic values from message body        
-        final js = new groovy.json.JsonSlurper();
-        final request = js.parseText(message.getBody(java.lang.String) as String);
-        properties.each { prop, texp ->
-            if (prop.startsWith(GP_TOPICEXP)) {
-                def varval = groovy.util.Eval.x(request, 'x.' + texp);
-                topicValProperties.put(GP_TOPICVAL + prop.replace(GP_TOPICEXP, ""), varval.toString());
-            } else if (prop.startsWith(GP_TOPICVAL)) {
-                topicValProperties.put(prop, texp.toString());
+        def tvJsonPath = properties.get(TV_JSON_PATH_PROPERTY)
+        def tvSetValue = properties.get(TV_SET_VALUE_PROPERTY)
+
+        // Special properties with variable content not present, nothing to do
+        if (!tvJsonPath && !tvSetValue) {
+            return message;
+        } else if (tvJsonPath.size() == 0 && tvSetValue.size() == 0) {
+            return message;
+        }
+
+        def composedTopicString = composedTopicPattern
+
+        // Set topic variables from payload
+        if (tvJsonPath && tvJsonPath.size() > 0) {
+            final js = new groovy.json.JsonSlurper()
+            final request = js.parseText(message.getBody(java.lang.String) as String)
+            tvJsonPath.each { entry ->
+                def varName = "{$entry.key}"
+                def varValue = groovy.util.Eval.x(request, 'x.' + entry.value)
+                if (varName && varValue) {
+                    composedTopicString = composedTopicString.replace(varName, varValue)
+                }
             }
         }
-        
-        // Add Extracted values to message properties
-        topicValProperties.each { key, value ->
-            def varName = "{" + key.replace(GP_TOPICVAL, "") + "}";
-            def varVal = value;
-            if (varVal == null || varVal.isEmpty()) {
-                varVal = "NULL";
+
+        // Set topic variables directly
+        if (tvSetValue) {
+            tvSetValue.each{ entry ->
+                def varName = "{$entry.key}"
+                def varValue = entry.value
+                if (varName && varValue) {
+                    composedTopicString = composedTopicString.replace(varName, varValue)
+                }
             }
-            composedTopicString = composedTopicString.replace(varName, varVal);
         }
-        
+
         // Set the composed topic to expected property
-        message.setProperty(COMPOSED_TOPIC, composedTopicString);
+        message.setProperty(COMPOSED_TOPIC_PROPERTY, composedTopicString);
 
     } catch (Exception ex) {
-        message.setProperty('gpath_error', ex.getMessage());
+        message.setProperty('composedTopic_error', ex.getMessage());
     }
     return message;
 }
