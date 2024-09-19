@@ -7,7 +7,7 @@ applications:
   - name: ep-asyncapi-sap-is-converter
     routes:
       - route: ep-is-gen.cfapps.ca10.hana.ondemand.com
-    path: target/ep-asyncapi-sap-is-converter.jar
+    path: ep-asyncapi-sap-is-converter.jar
     memory: 1G
     disk_quota: 512M
     env:
