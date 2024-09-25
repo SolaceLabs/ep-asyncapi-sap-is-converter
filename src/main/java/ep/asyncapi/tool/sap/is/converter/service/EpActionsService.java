@@ -155,7 +155,7 @@ public class EpActionsService {
             //resources/scenarios/integrationflow
             sapIFlowConverter.createIntegrationFlowFiles(integrationFlowSubDirectory, mapMuleDoc);
             //resources/script/
-            sapIFlowConverter.createDynamicTopicScriptFiles(scriptSubDirectory);
+            sapIFlowConverter.createDynamicTopicScriptFiles(scriptSubDirectory, mapMuleDoc);
 
             //create zip file
             final File zipFile = createZipFile(mainDirectory);
