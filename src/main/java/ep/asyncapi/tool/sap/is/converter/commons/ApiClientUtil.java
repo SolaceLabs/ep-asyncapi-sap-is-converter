@@ -1,7 +1,6 @@
 package ep.asyncapi.tool.sap.is.converter.commons;
 
 import com.solace.cloud.ep.designer.ApiClient;
-import com.solace.cloud.ep.designer.Configuration;
 import com.solace.cloud.ep.designer.auth.HttpBearerAuth;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ public class ApiClientUtil {
 
     public ApiClient initializeApiClient(final String epToken) {
         if (StringUtils.hasText(epToken)) {
-            ApiClient apiClient = Configuration.getDefaultApiClient();
+            final ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(basePath);
             HttpBearerAuth APIToken = (HttpBearerAuth) apiClient.getAuthentication("APIToken");
             APIToken.setBearerToken(epToken);
