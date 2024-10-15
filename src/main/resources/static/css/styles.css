@@ -35,7 +35,6 @@
 }
 
 
-/* Add media query for smaller screens if needed */
 @media (max-width: 576px) {
     .container-box {
         width: 100%;
@@ -47,10 +46,10 @@
 }
 
 .description-cell {
-    max-width: 200px; /* Adjust the maximum width as needed */
+    max-width: 200px;
     overflow: hidden;
-    text-overflow: ellipsis; /* Optional: Display ellipsis for overflowed text */
-    white-space: nowrap; /* Optional: Prevent text wrapping if desired */
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .extraTopPadding {
@@ -80,6 +79,11 @@ table.epObjectsTable thead th {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 100px;  /* Optional: Adjust min-width */
-    max-width: 300px;  /* Optional: Adjust max-width */
+    min-width: 100px;
+    max-width: 300px;
+}
+
+.accordion-button-active {
+    background-color: #007bff;
+    color: white;
 }

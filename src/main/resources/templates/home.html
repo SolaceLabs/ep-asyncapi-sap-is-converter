@@ -58,10 +58,10 @@
         <div class="accordion" id="epArtifactsDisplayAccordion">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingOne">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <div class="accordion-button" style="cursor: default;" aria-expanded="true"
+                         aria-controls="collapseOne">
                         Step 2 - Select Application Domain
-                    </button>
+                    </div>
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
                      data-bs-parent="#epArtifactsDisplayAccordion">
@@ -79,7 +79,16 @@
                             <tr th:each="applicationDomainDTO, index : ${applicationDomainDTOList}">
                                 <td th:text="${index.index + 1}"></td>
                                 <td th:text="${applicationDomainDTO.name}"></td>
-                                <td th:text="${applicationDomainDTO.description}"></td>
+                                <td>
+                                    <span class="short-description"
+                                          th:text="${#strings.abbreviate(applicationDomainDTO.description, 200)}"></span>
+                                    <span class="full-description d-none"
+                                          th:text="${applicationDomainDTO.description}"></span>
+                                    <button type="button" class="btn btn-link p-0 show-more"
+                                            th:if="${#strings.length(applicationDomainDTO.description) > 200}"
+                                            onclick="toggleDescription(this)">Show
+                                    </button>
+                                </td>
                                 <td>
                                     <button type="button" class="btn btn-primary"
                                             th:data-app-domain-id="${applicationDomainDTO.id}"
@@ -87,7 +96,6 @@
                                             onclick="handleAppDomainSelection(this)">
                                         Select
                                     </button>
-
                                 </td>
                             </tr>
                             </tbody>
@@ -99,15 +107,14 @@
             <!-- Step 3: Select Application -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <div class="accordion-button collapsed accordion-button-active" style="cursor: default;"
+                         aria-expanded="false" aria-controls="collapseTwo">
                         Step 3 - Select Application
-                    </button>
+                    </div>
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                      data-bs-parent="#epArtifactsDisplayAccordion">
                     <div class="accordion-body applicationList">
-
                         <p class="EpAppDomainNameText"></p>
                         <table class="table epObjectsTable">
                             <thead>
@@ -130,10 +137,10 @@
             <!-- Step 4: Select Version for SAP IS export -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <div class="accordion-button collapsed" style="cursor: default;" aria-expanded="false"
+                         aria-controls="collapseThree">
                         Step 4 - Select Version for SAP IS export
-                    </button>
+                    </div>
                 </h2>
                 <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
                      data-bs-parent="#epArtifactsDisplayAccordion">
@@ -160,51 +167,50 @@
     </div>
 </main>
 
-
 <!-- Footer -->
 <footer class="bg-dark text-light py-3">
     <div class="container">
         <div class="mt-5 p-4 bg-dark text-white">
             <div class="row">
-                    <div class="col-md-4">
-                        <li>
-                            Products
-                            <ul class="sub-menu">
-                                <li><a href="https://solace.com/products/platform/">PubSub+ Platform</a></li>
-                                <li><a href="https://solace.com/products/event-broker/">PubSub+ Event Broker</a></li>
-                                <li><a href="https://solace.com/products/portal/">PubSub+ Event Portal</a></li>
-                            </ul>
-                        </li>
-                    </div>
+                <div class="col-md-4">
+                    <li>
+                        Products
+                        <ul class="sub-menu">
+                            <li><a href="https://solace.com/products/platform/">PubSub+ Platform</a></li>
+                            <li><a href="https://solace.com/products/event-broker/">PubSub+ Event Broker</a></li>
+                            <li><a href="https://solace.com/products/portal/">PubSub+ Event Portal</a></li>
+                        </ul>
+                    </li>
+                </div>
 
-                    <div class="col-md-4">
-                        <li>
-                            Tool support
-                            <ul class="sub-menu">
-                                <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/blob/master/README.md">How
-                                    to use</a></li>
-                                <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator">GitHub link</a></li>
-                                <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/issues">Report
-                                    issue</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </div>
+                <div class="col-md-4">
+                    <li>
+                        Tool support
+                        <ul class="sub-menu">
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/blob/master/README.md">How
+                                to use</a></li>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator">GitHub link</a></li>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/issues">Report
+                                issue</a>
+                            </li>
+                        </ul>
+                    </li>
+                </div>
 
-                    <div class="col-md-4">
-                        <li>Solace Developers and Community
-                            <ul class="sub-menu">
-                                <li><a target="_blank" rel="noopener" href="https://docs.solace.com/">Docs</a></li>
-                                <li><a target="_blank" rel="noopener" href="https://tutorials.solace.dev/">API
-                                    Tutorials</a>
-                                </li>
-                                <li><a target="_blank" rel="noopener" href="https://solace.dev/">Dev Portal</a></li>
-                                <li><a target="_blank" rel="noopener" href="https://codelabs.solace.dev/">Codelabs</a>
-                                </li>
-                                <li><a href="https://solace.community/">Community</a></li>
-                            </ul>
-                        </li>
-                    </div>
+                <div class="col-md-4">
+                    <li>Solace Developers and Community
+                        <ul class="sub-menu">
+                            <li><a target="_blank" rel="noopener" href="https://docs.solace.com/">Docs</a></li>
+                            <li><a target="_blank" rel="noopener" href="https://tutorials.solace.dev/">API
+                                Tutorials</a>
+                            </li>
+                            <li><a target="_blank" rel="noopener" href="https://solace.dev/">Dev Portal</a></li>
+                            <li><a target="_blank" rel="noopener" href="https://codelabs.solace.dev/">Codelabs</a>
+                            </li>
+                            <li><a href="https://solace.community/">Community</a></li>
+                        </ul>
+                    </li>
+                </div>
             </div>
         </div>
     </div>

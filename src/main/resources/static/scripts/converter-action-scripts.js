@@ -23,6 +23,9 @@ function handleAppDomainSelection(selectedAppDomainButton) {
         appListAccordion.classList.add('show');  // Open accordion
     }
 
+    document.querySelector('#headingOne .accordion-button').classList.remove('accordion-button-active');
+    document.querySelector('#headingTwo .accordion-button').classList.add('accordion-button-active');
+
     // Scroll to the application list accordion for better user experience
     document.getElementById('headingTwo').scrollIntoView({behavior: 'smooth'});
 }
@@ -44,6 +47,9 @@ function handleApplicationSelection(selectedAppButton) {
     if (versionAccordion) {
         versionAccordion.classList.add('show');  // Open Step 4 accordion
     }
+
+    document.querySelector('#headingTwo .accordion-button').classList.remove('accordion-button-active');
+    document.querySelector('#headingThree .accordion-button').classList.add('accordion-button-active');
 
     // Scroll to the version accordion for better user experience
     document.getElementById('headingThree').scrollIntoView({behavior: 'smooth'});
@@ -227,7 +233,27 @@ function goBackToStep(stepCounter) {
         targetAccordion.classList.add('show');  // Open the target accordion
     }
 
+    document.querySelectorAll('.accordion-button').forEach(button => button.classList.remove('accordion-button-active'));
+    document.querySelector(`#heading${stepCounter} .accordion-button`).classList.add('accordion-button-active');
+
     // Scroll to the target accordion for better user experience
     document.getElementById(`heading${stepCounter}`).scrollIntoView({behavior: 'smooth'});
 }
 
+function toggleDescription(button) {
+    const shortDescription = button.previousElementSibling; // Get the short description
+    const fullDescription = shortDescription.nextElementSibling; // Get the full description
+
+    // Toggle visibility
+    if (fullDescription.classList.contains('d-none')) {
+        // Show full description
+        fullDescription.classList.remove('d-none');
+        shortDescription.classList.add('d-none');
+        button.textContent = 'Hide'; // Change button text to "Hide"
+    } else {
+        // Hide full description
+        fullDescription.classList.add('d-none');
+        shortDescription.classList.remove('d-none');
+        button.textContent = 'Show'; // Change button text back to "Show"
+    }
+}
