@@ -64,3 +64,22 @@
     border-radius: 4px;
     border: 1px solid #ccc;
 }
+
+
+
+.accordion-button {
+    font-size: x-large;
+}
+
+table.epObjectsTable {
+    border-style: groove;
+    width: 98%;
+}
+
+table.epObjectsTable thead th {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 100px;  /* Optional: Adjust min-width */
+    max-width: 300px;  /* Optional: Adjust max-width */
+}

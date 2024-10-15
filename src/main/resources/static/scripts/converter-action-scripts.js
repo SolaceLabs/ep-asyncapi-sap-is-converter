@@ -1,128 +1,233 @@
-// script.js
-
+// Function to reset the EP Token form
 function cancelEpForm() {
-    document.getElementById("epToken").value = '';
+    const tokenInput = document.getElementById("epToken");
+    tokenInput.value = '';
+    tokenInput.classList.remove("is-invalid"); // Reset invalid class if any
 }
 
-function getAppsForAppDomainId(selectedAppDomainRadio) {
-    const appDomainId = selectedAppDomainRadio.dataset.appDomainId;
-    const appDomainName = selectedAppDomainRadio.dataset.appDomainName;
-    if (appDomainId) {
-        fetch(`/${appDomainId}/applications`)
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector('.applicationTable tbody');
-                tableBody.innerHTML = ''; // Clear existing rows
-                data.forEach((app, index) => {
-                    const row = `<tr>
-                                <td>${index + 1}</td>
-                                <td>${app.name}</td>
-                                <td>${app.numberOfVersions}</td>
-                                <td><input type="radio" name="application" 
-                                            value="${app.id}" 
-                                            data-app-id="${app.id}" 
-                                            data-app-domain-id="${appDomainId}" 
-                                            data-app-name="${app.name}" 
-                                            data-app-domain-name="${appDomainName}" 
-                                    onclick="getVersionsForApplication(this)"></td>
-                            </tr>`;
-                    tableBody.insertAdjacentHTML('beforeend', row);
-                });
-                document.querySelector('.applicationTable').style.display = 'block';
-                const appDomainNamePara = document.querySelector('.EpAppDomainNameText');
-                appDomainNamePara.textContent = 'Displaying EP applications for Application Domain : ' + `${appDomainName}`;
-            })
-            .catch(error => {
-                console.error("Error fetching apps:", error);
-            });
-    } else {
-        console.error("Failed to get appDomainId from selected radio button.");
+// Function to handle app domain selection, fetch apps, and toggle accordion panels
+function handleAppDomainSelection(selectedAppDomainButton) {
+
+    // Call the function to fetch applications for the selected domain
+    getAppsForAppDomainId(selectedAppDomainButton);
+
+    // Close the Application Domain accordion (Step 2)
+    const appDomainAccordion = document.getElementById('collapseOne');
+    if (appDomainAccordion) {
+        appDomainAccordion.classList.remove('show');  // Close accordion
     }
-}
 
-function getVersionsForApplication(selectedAppRadio) {
-    const appId = selectedAppRadio.dataset.appId;
-    const appDomainId = selectedAppRadio.dataset.appDomainId;
-    const appName = selectedAppRadio.dataset.appName;
-    const appDomainName = selectedAppRadio.dataset.appDomainName;
-
-    console.log("App domain id:" + appDomainId);
-    console.log("App id:" + appId);
-
-    if (appDomainId && appId) {
-        fetch(`/${appDomainId}/applications/${appId}/versions`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("App Versions for appId", appId, ":", data);
-                const tableBody = document.querySelector('.applicationVersionTable tbody');
-                tableBody.innerHTML = '';
-                data.forEach((appVersion, index) => {
-                    const row = `<tr>
-                                <td>${index + 1}</td>
-                                <td>${appVersion.version}</td>
-                                <td>${appVersion.state}</td>
-                                <td><button class="btn btn-primary" value="${appVersion.id}" 
-                                        data-app-version-id="${appVersion.id}" 
-                                        data-app-id="${appId}" 
-                                        data-app-domain-id="${appDomainId}" 
-                                        data-app-domain-name="${appDomainName}"
-                                        data-app-name="${appName}"
-                                        data-app-version="${appVersion.version}"
-                                    onclick="generateISArtefactDownload(this)">Download</button></td>
-                            </tr>`;
-                    tableBody.insertAdjacentHTML('beforeend', row);
-                });
-                document.querySelector('.applicationVersionTable').style.display = 'block';
-
-                const appNamePara = document.querySelector('.EPAppNameText');
-                appNamePara.textContent = 'Displaying versions for Application : ' + `${appName}`;
-            })
-            .catch(error => {
-                console.error("Error fetching app versions:", error);
-            });
-    } else {
-        console.error("Failed to get applicationId from selected radio button.");
+    // Open the Application List accordion (Step 3)
+    const appListAccordion = document.getElementById('collapseTwo');
+    if (appListAccordion) {
+        appListAccordion.classList.add('show');  // Open accordion
     }
+
+    // Scroll to the application list accordion for better user experience
+    document.getElementById('headingTwo').scrollIntoView({behavior: 'smooth'});
 }
 
+// Function to handle app selection and toggle accordion panels
+function handleApplicationSelection(selectedAppButton) {
 
+    // Call the function to fetch versions for the selected application
+    getVersionsForApplication(selectedAppButton);
+
+    // Close the Application accordion (Step 3)
+    const appListAccordion = document.getElementById('collapseTwo');
+    if (appListAccordion) {
+        appListAccordion.classList.remove('show');  // Close Step 3 accordion
+    }
+
+    // Open the Version accordion (Step 4)
+    const versionAccordion = document.getElementById('collapseThree');
+    if (versionAccordion) {
+        versionAccordion.classList.add('show');  // Open Step 4 accordion
+    }
+
+    // Scroll to the version accordion for better user experience
+    document.getElementById('headingThree').scrollIntoView({behavior: 'smooth'});
+}
+
+// Function to fetch applications for a selected Application Domain ID
+function getAppsForAppDomainId(selectedAppDomainButton) {
+    const appDomainId = selectedAppDomainButton.dataset.appDomainId;
+    const appDomainName = selectedAppDomainButton.dataset.appDomainName;
+
+    if (!appDomainId) {
+        console.error("No App Domain ID found!");
+        return;
+    }
+
+    displayLoader('.applicationList tbody'); // Display loader while fetching
+    fetch(`/${appDomainId}/applications`)
+        .then(handleErrors)
+        .then(data => {
+            populateTableForApplications('.applicationList tbody', data, generateAppRows, appDomainName, appDomainId);
+        })
+        .catch(error => {
+            console.error("Error fetching apps:", error);
+            showError('.applicationList tbody', 'Failed to load applications.');
+        });
+}
+
+// Function to fetch versions for a selected Application ID
+function getVersionsForApplication(selectedAppButton) {
+    const appId = selectedAppButton.dataset.appId;
+    const appDomainId = selectedAppButton.dataset.appDomainId;
+    const appName = selectedAppButton.dataset.appName;
+    const appDomainName = selectedAppButton.dataset.appDomainName;
+
+
+    if (!appId || !appDomainId) {
+        console.error("Application ID or App Domain ID is missing.");
+        return;
+    }
+
+    displayLoader('.applicationVersionList tbody'); // Show loader while fetching
+    fetch(`/${appDomainId}/applications/${appId}/versions`)
+        .then(handleErrors)
+        .then(data => {
+            populateTableForApplicationVersions('.applicationVersionList tbody', data, generateVersionRows, appName, appId, appDomainId, appDomainName);
+        })
+        .catch(error => {
+            console.error("Error fetching app versions:", error);
+            showError('.applicationVersionList tbody', 'Failed to load versions.');
+        });
+}
+
+// Function to download IS Artefact for a selected version
 function generateISArtefactDownload(selectedAppVersionButton) {
-    const appId = selectedAppVersionButton.dataset.appId;
     const appDomainId = selectedAppVersionButton.dataset.appDomainId;
+    const appId = selectedAppVersionButton.dataset.appId;
     const appVersionId = selectedAppVersionButton.dataset.appVersionId;
-    const appVersion = selectedAppVersionButton.dataset.appVersion;
     const appName = selectedAppVersionButton.dataset.appName;
     const appDomainName = selectedAppVersionButton.dataset.appDomainName;
+    const appVersion = selectedAppVersionButton.dataset.appVersion;
 
-    console.log("App domain id:" + appDomainId);
-    console.log("App id:" + appId);
-    console.log("App Version id:" + appVersionId);
-
-    if (appDomainId && appId && appVersionId) {
-        fetch(`/${appDomainId}/applications/${appId}/versions/${appVersionId}/isArtefact`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = appDomainName + '-' + appName + '-' + appVersion + '-ISArtefact.zip';
-
-                // Append the link to the body and trigger the download
-                document.body.appendChild(a);
-                a.click();
-
-                // Clean up
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error("Failed to get IS artefact for the selected Application version:", error);
-            });
-    } else {
-        console.error("Failed to get required inputs from selected button element.");
+    if (!appDomainId || !appId || !appVersionId) {
+        console.error("Missing inputs for generating IS artefact.");
+        return;
     }
+
+    fetch(`/${appDomainId}/applications/${appId}/versions/${appVersionId}/isArtefact`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = appDomainName + '-' + appName + '-' + appVersion + '-ISArtefact.zip';
+
+            // Append the link to the body and trigger the download
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error("Failed to get IS artefact for the selected Application version:", error);
+        });
 }
+
+// Helper function to handle fetch errors
+function handleErrors(response) {
+    if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+    }
+    return response.json();
+}
+
+// Helper function to populate tables with application data
+function populateTableForApplications(tableSelector, data, rowGenerator, appDomainName, appDomainId) {
+    const tableBody = document.querySelector(tableSelector);
+    tableBody.innerHTML = ''; // Clear table content
+    data.forEach((item, index) => {
+        const row = rowGenerator(item, index, appDomainName, appDomainId);
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+
+// Helper function to populate tables with application version data
+function populateTableForApplicationVersions(tableSelector, data, rowGenerator, appName, appId, appDomainId, appDomainName) {
+    const tableBody = document.querySelector(tableSelector);
+    tableBody.innerHTML = ''; // Clear table content
+    data.forEach((item, index) => {
+        const row = rowGenerator(item, index, appName, appId, appDomainId, appDomainName);
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+// Helper function to generate rows for applications
+function generateAppRows(app, index, appDomainName, appDomainId) {
+    return `<tr>
+                <td>${index + 1}</td>
+                <td>${app.name}</td>
+                <td>${app.numberOfVersions}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" name="application" value="${app.id}"
+                        data-app-id="${app.id}" 
+                        data-app-domain-id="${appDomainId}"
+                        data-app-name="${app.name}" 
+                        data-app-domain-name="${appDomainName}"
+                        onclick="handleApplicationSelection(this)">
+                        Select
+                    </button>
+                </td>
+            </tr>`;
+}
+
+// Helper function to generate rows for versions
+function generateVersionRows(version, index, appName, appId, appDomainId, appDomainName) {
+    //appName, appId, appDomainId, appDomainName
+    return `<tr>
+                <td>${index + 1}</td>
+                <td>${version.version}</td>
+                <td>${version.state}</td>
+                <td><button class="btn btn-primary"
+                            value="${version.id}"
+                            data-app-version-id="${version.id}"
+                            data-app-id="${appId}"
+                            data-app-domain-id="${appDomainId}" 
+                            data-app-domain-name="${appDomainName}"
+                            data-app-name="${appName}"
+                            data-app-version="${version.version}"
+                            onclick="generateISArtefactDownload(this)">
+                    Download
+                </button></td>
+            </tr>`;
+}
+
+// Show loader in the table body
+function displayLoader(tableSelector) {
+    const tableBody = document.querySelector(tableSelector);
+    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading...</td></tr>';
+}
+
+// Show error message in the table
+function showError(tableSelector, message) {
+    const tableBody = document.querySelector(tableSelector);
+    tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">${message}</td></tr>`;
+}
+
+function goBackToStep(stepCounter) {
+    // Close all accordion panels
+    const accordions = document.querySelectorAll('.accordion-collapse');
+    accordions.forEach(acc => acc.classList.remove('show'));
+
+    // Open the specified step accordion
+    const targetAccordion = document.getElementById(`collapse${stepCounter}`);
+    if (targetAccordion) {
+        targetAccordion.classList.add('show');  // Open the target accordion
+    }
+
+    // Scroll to the target accordion for better user experience
+    document.getElementById(`heading${stepCounter}`).scrollIntoView({behavior: 'smooth'});
+}
+
