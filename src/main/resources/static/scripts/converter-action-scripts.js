@@ -1,75 +1,147 @@
-// Function to reset the EP Token form
 function cancelEpForm() {
     const tokenInput = document.getElementById("epToken");
     tokenInput.value = '';
-    tokenInput.classList.remove("is-invalid"); // Reset invalid class if any
+    tokenInput.classList.remove("is-invalid");
 }
 
-// Function to handle app domain selection, fetch apps, and toggle accordion panels
-function handleAppDomainSelection(selectedAppDomainButton) {
+document.addEventListener("DOMContentLoaded", function() {
 
-    // Call the function to fetch applications for the selected domain
-    getAppsForAppDomainId(selectedAppDomainButton);
+    var errorFlag = /*[[${errorMessageFlag}]]*/ '';
+    if (errorFlag === 'SESSION_EXPIRED') {
+        var errorSection = document.getElementById('sessionExpiredError');
+        if (errorSection) {
+            errorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+});
 
-    // Close the Application Domain accordion (Step 2)
-    const appDomainAccordion = document.getElementById('collapseOne');
-    if (appDomainAccordion) {
-        appDomainAccordion.classList.remove('show');  // Close accordion
+const AppDomainPagination = (function () {
+    let appDomainsCurrentPage = 1;
+
+    function fetchPaginatedAppDomains(pageNumber) {
+        fetch(`/applicationDomains?pageNumber=${pageNumber}`)
+            .then(handleErrors)
+            .then(data => {
+                appDomainsCurrentPage = data.currentPage;
+                populateTableForApplicationDomains('.epObjectsTable tbody', data.applicationDomainDTOList);
+                document.getElementById('appDomainsCurrentPage').textContent = appDomainsCurrentPage;
+                document.getElementById('appDomainsNextPageBtn').setAttribute('data-app-domain-total-pages', data.totalPages);
+                document.getElementById('appDomainsPrevPageBtn').disabled = appDomainsCurrentPage === 1;
+                document.getElementById('appDomainsNextPageBtn').disabled = appDomainsCurrentPage === data.totalPages;
+            })
+            .catch(error => {
+                console.error("Error fetching application domains:", error);
+                showError('.epObjectsTable tbody', 'Failed to load application domains.');
+            });
     }
 
-    // Open the Application List accordion (Step 3)
+    function loadAppDomainsNextPage(nextButton) {
+        const appDomainsTotalPages = nextButton.dataset.appDomainTotalPages;
+        if (appDomainsCurrentPage < appDomainsTotalPages) {
+            fetchPaginatedAppDomains(appDomainsCurrentPage + 1);
+        }
+    }
+
+    function loadAppDomainsPreviousPage() {
+        if (appDomainsCurrentPage > 1) {
+            fetchPaginatedAppDomains(appDomainsCurrentPage - 1);
+        }
+    }
+
+    function populateTableForApplicationDomains(tableSelector, data) {
+        const tableBody = document.querySelector(tableSelector);
+        tableBody.innerHTML = '';
+
+        data.forEach((applicationDomain, index) => {
+            const row = `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${applicationDomain.name}</td>
+                <td>
+                    <span class="short-description">
+                        ${abbreviateText(applicationDomain.description, 200)}
+                    </span>
+                    <span class="full-description d-none">
+                        ${applicationDomain.description}
+                    </span>
+                    ${applicationDomain.description.length > 200 ? '<button type="button" class="btn btn-link p-0 show-more" onclick="toggleDescription(this)">Show</button>' : ''}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" 
+                        data-app-domain-id="${applicationDomain.id}" 
+                        data-app-domain-name="${applicationDomain.name}"
+                        onclick="handleAppDomainSelection(this)">
+                        Select
+                    </button>
+                </td>
+            </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    function abbreviateText(text, maxLength) {
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+
+    window.loadAppDomainsNextPage = loadAppDomainsNextPage;
+    window.loadAppDomainsPreviousPage = loadAppDomainsPreviousPage;
+
+    return {
+        fetchPaginatedAppDomains, populateTableForApplicationDomains, abbreviateText
+    };
+})();
+
+
+function handleAppDomainSelection(selectedAppDomainButton) {
+    getAppsForAppDomainId(selectedAppDomainButton);
+    const appDomainAccordion = document.getElementById('collapseOne');
+    if (appDomainAccordion) {
+        appDomainAccordion.classList.remove('show');
+    }
     const appListAccordion = document.getElementById('collapseTwo');
     if (appListAccordion) {
         appListAccordion.classList.add('show');  // Open accordion
     }
-
     document.querySelector('#headingOne .accordion-button').classList.remove('accordion-button-active');
     document.querySelector('#headingTwo .accordion-button').classList.add('accordion-button-active');
-
-    // Scroll to the application list accordion for better user experience
     document.getElementById('headingTwo').scrollIntoView({behavior: 'smooth'});
 }
 
-// Function to handle app selection and toggle accordion panels
 function handleApplicationSelection(selectedAppButton) {
-
-    // Call the function to fetch versions for the selected application
     getVersionsForApplication(selectedAppButton);
-
-    // Close the Application accordion (Step 3)
     const appListAccordion = document.getElementById('collapseTwo');
     if (appListAccordion) {
-        appListAccordion.classList.remove('show');  // Close Step 3 accordion
+        appListAccordion.classList.remove('show');
     }
-
-    // Open the Version accordion (Step 4)
     const versionAccordion = document.getElementById('collapseThree');
     if (versionAccordion) {
-        versionAccordion.classList.add('show');  // Open Step 4 accordion
+        versionAccordion.classList.add('show');
     }
-
     document.querySelector('#headingTwo .accordion-button').classList.remove('accordion-button-active');
     document.querySelector('#headingThree .accordion-button').classList.add('accordion-button-active');
-
-    // Scroll to the version accordion for better user experience
     document.getElementById('headingThree').scrollIntoView({behavior: 'smooth'});
 }
 
-// Function to fetch applications for a selected Application Domain ID
+
 function getAppsForAppDomainId(selectedAppDomainButton) {
     const appDomainId = selectedAppDomainButton.dataset.appDomainId;
     const appDomainName = selectedAppDomainButton.dataset.appDomainName;
+    const appListPageNumber = 1;
+    processAppListFetch(appDomainId, appDomainName, appListPageNumber);
+}
 
-    if (!appDomainId) {
-        console.error("No App Domain ID found!");
+function processAppListFetch(appDomainId, appDomainName, appListPageNumber) {
+    if (!appDomainId || !appDomainName) {
+        console.error("No App Domain ID or App Domain name found!");
+        showError('.applicationList tbody', 'Failed to load applications.');
         return;
     }
-
     displayLoader('.applicationList tbody'); // Display loader while fetching
-    fetch(`/${appDomainId}/applications`)
+    fetch(`/${appDomainId}/applications?pageNumber=${appListPageNumber}`)
         .then(handleErrors)
         .then(data => {
-            populateTableForApplications('.applicationList tbody', data, generateAppRows, appDomainName, appDomainId);
+            populateTableForApplications('.applicationList tbody', data.applicationDTOList, generateAppRows, appDomainName, appDomainId);
+            updateAppsPagination(data.totalPages, data.currentPage, appDomainName, appDomainId);
         })
         .catch(error => {
             console.error("Error fetching apps:", error);
@@ -77,24 +149,36 @@ function getAppsForAppDomainId(selectedAppDomainButton) {
         });
 }
 
-// Function to fetch versions for a selected Application ID
+function loadAppsPage(paginationButton) {
+    const appDomainId = paginationButton.dataset.appDomainId;
+    const appDomainName = paginationButton.dataset.appDomainName;
+    const appListTotalPages = parseInt(paginationButton.dataset.appsTotalPages, 10);
+    const appListCurrentPage = parseInt(paginationButton.dataset.appsCurrentPage, 10);
+    const direction = parseInt(paginationButton.dataset.direction, 10);
+    const newPageNumber = appListCurrentPage + direction;
+    (newPageNumber >= 1 && newPageNumber <= appListTotalPages) ? processAppListFetch(appDomainId, appDomainName, newPageNumber) : console.log("No more pages to fetch.");
+}
+
 function getVersionsForApplication(selectedAppButton) {
     const appId = selectedAppButton.dataset.appId;
     const appDomainId = selectedAppButton.dataset.appDomainId;
     const appName = selectedAppButton.dataset.appName;
     const appDomainName = selectedAppButton.dataset.appDomainName;
+    const appVersionListPageNumber = 1;
+    processAppVersionListFetch(appId, appDomainId, appName, appDomainName, appVersionListPageNumber);
+}
 
-
+function processAppVersionListFetch(appId, appDomainId, appName, appDomainName, appVersionListPageNumber) {
     if (!appId || !appDomainId) {
         console.error("Application ID or App Domain ID is missing.");
         return;
     }
-
     displayLoader('.applicationVersionList tbody'); // Show loader while fetching
-    fetch(`/${appDomainId}/applications/${appId}/versions`)
+    fetch(`/${appDomainId}/applications/${appId}/versions?pageNumber=${appVersionListPageNumber}`)
         .then(handleErrors)
         .then(data => {
-            populateTableForApplicationVersions('.applicationVersionList tbody', data, generateVersionRows, appName, appId, appDomainId, appDomainName);
+            populateTableForApplicationVersions('.applicationVersionList tbody', data.applicationVersionDTOList, generateVersionRows, appName, appId, appDomainId, appDomainName);
+            updateAppVersionPagination(data.totalPages, data.currentPage, appId, appDomainId, appName, appDomainName);
         })
         .catch(error => {
             console.error("Error fetching app versions:", error);
@@ -102,7 +186,43 @@ function getVersionsForApplication(selectedAppButton) {
         });
 }
 
-// Function to download IS Artefact for a selected version
+function updateAppVersionPagination(totalAppVersionPagesCount, currentAppVersionPageNumber, appId, appDomainId, appName, appDomainName) {
+    const currentPageElement = document.getElementById('appVersionsCurrentPage');
+    const totalPagesElement = document.getElementById('appVersionsTotalPages');
+    const prevButton = document.getElementById('appVersionsPrevPageBtn');
+    const nextButton = document.getElementById('appVersionsNextPageBtn');
+    currentPageElement.innerText = currentAppVersionPageNumber;
+    totalPagesElement.innerText = totalAppVersionPagesCount;
+    prevButton.disabled = currentAppVersionPageNumber === 1;
+    nextButton.disabled = currentAppVersionPageNumber === totalAppVersionPagesCount;
+    const attributes = {
+        'data-appversions-total-pages': totalAppVersionPagesCount,
+        'data-appversions-current-page': currentAppVersionPageNumber,
+        'data-app-domain-id': appDomainId,
+        'data-app-domain-name': appDomainName,
+        'data-app-id': appId,
+        'data-app-name': appName,
+    };
+    [prevButton, nextButton].forEach(button => {
+        Object.entries(attributes).forEach(([key, value]) => {
+            button.setAttribute(key, value);
+        });
+    });
+}
+
+function loadAppVersions(paginationButton) {
+    const appDomainId = paginationButton.dataset.appDomainId;
+    const appDomainName = paginationButton.dataset.appDomainName;
+    const appId = paginationButton.dataset.appId;
+    const appName = paginationButton.dataset.appName;
+
+    const appVersionsListTotalPages = parseInt(paginationButton.dataset.appVersionsTotalPages, 10);
+    const appVersionsListCurrentPage = parseInt(paginationButton.dataset.appVersionsCurrentPage, 10);
+    const direction = parseInt(paginationButton.dataset.direction, 10);
+    const newPageNumber = appVersionsListCurrentPage + direction;
+    (newPageNumber >= 1 && newPageNumber <= appVersionsListTotalPages) ? processAppVersionListFetch(appId, appDomainId, appName, appDomainName, newPageNumber) : console.log("No more pages to fetch.");
+}
+
 function generateISArtefactDownload(selectedAppVersionButton) {
     const appDomainId = selectedAppVersionButton.dataset.appDomainId;
     const appId = selectedAppVersionButton.dataset.appId;
@@ -110,12 +230,10 @@ function generateISArtefactDownload(selectedAppVersionButton) {
     const appName = selectedAppVersionButton.dataset.appName;
     const appDomainName = selectedAppVersionButton.dataset.appDomainName;
     const appVersion = selectedAppVersionButton.dataset.appVersion;
-
     if (!appDomainId || !appId || !appVersionId) {
         console.error("Missing inputs for generating IS artefact.");
         return;
     }
-
     fetch(`/${appDomainId}/applications/${appId}/versions/${appVersionId}/isArtefact`)
         .then(response => {
             if (!response.ok) {
@@ -128,12 +246,8 @@ function generateISArtefactDownload(selectedAppVersionButton) {
             const a = document.createElement('a');
             a.href = url;
             a.download = appDomainName + '-' + appName + '-' + appVersion + '-ISArtefact.zip';
-
-            // Append the link to the body and trigger the download
             document.body.appendChild(a);
             a.click();
-
-            // Clean up
             window.URL.revokeObjectURL(url);
         })
         .catch(error => {
@@ -141,7 +255,6 @@ function generateISArtefactDownload(selectedAppVersionButton) {
         });
 }
 
-// Helper function to handle fetch errors
 function handleErrors(response) {
     if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -149,7 +262,6 @@ function handleErrors(response) {
     return response.json();
 }
 
-// Helper function to populate tables with application data
 function populateTableForApplications(tableSelector, data, rowGenerator, appDomainName, appDomainId) {
     const tableBody = document.querySelector(tableSelector);
     tableBody.innerHTML = ''; // Clear table content
@@ -159,18 +271,37 @@ function populateTableForApplications(tableSelector, data, rowGenerator, appDoma
     });
 }
 
+function updateAppsPagination(totalAppPagesCount, currentAppPageNumber, appDomainName, appDomainId) {
+    const currentPageElement = document.getElementById('appsCurrentPage');
+    const totalPagesElement = document.getElementById('appsTotalPages');
+    const prevButton = document.getElementById('appsPrevPageBtn');
+    const nextButton = document.getElementById('appsNextPageBtn');
+    currentPageElement.innerText = currentAppPageNumber;
+    totalPagesElement.innerText = totalAppPagesCount;
+    prevButton.disabled = currentAppPageNumber === 1;
+    nextButton.disabled = currentAppPageNumber === totalAppPagesCount;
+    const attributes = {
+        'data-apps-total-pages': totalAppPagesCount,
+        'data-apps-current-page': currentAppPageNumber,
+        'data-app-domain-id': appDomainId,
+        'data-app-domain-name': appDomainName
+    };
+    [prevButton, nextButton].forEach(button => {
+        Object.entries(attributes).forEach(([key, value]) => {
+            button.setAttribute(key, value);
+        });
+    });
+}
 
-// Helper function to populate tables with application version data
 function populateTableForApplicationVersions(tableSelector, data, rowGenerator, appName, appId, appDomainId, appDomainName) {
     const tableBody = document.querySelector(tableSelector);
-    tableBody.innerHTML = ''; // Clear table content
+    tableBody.innerHTML = '';
     data.forEach((item, index) => {
         const row = rowGenerator(item, index, appName, appId, appDomainId, appDomainName);
         tableBody.insertAdjacentHTML('beforeend', row);
     });
 }
 
-// Helper function to generate rows for applications
 function generateAppRows(app, index, appDomainName, appDomainId) {
     return `<tr>
                 <td>${index + 1}</td>
@@ -189,9 +320,7 @@ function generateAppRows(app, index, appDomainName, appDomainId) {
             </tr>`;
 }
 
-// Helper function to generate rows for versions
 function generateVersionRows(version, index, appName, appId, appDomainId, appDomainName) {
-    //appName, appId, appDomainId, appDomainName
     return `<tr>
                 <td>${index + 1}</td>
                 <td>${version.version}</td>
@@ -210,24 +339,19 @@ function generateVersionRows(version, index, appName, appId, appDomainId, appDom
             </tr>`;
 }
 
-// Show loader in the table body
 function displayLoader(tableSelector) {
     const tableBody = document.querySelector(tableSelector);
     tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading...</td></tr>';
 }
 
-// Show error message in the table
 function showError(tableSelector, message) {
     const tableBody = document.querySelector(tableSelector);
     tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">${message}</td></tr>`;
 }
 
 function goBackToStep(stepCounter) {
-    // Close all accordion panels
     const accordions = document.querySelectorAll('.accordion-collapse');
     accordions.forEach(acc => acc.classList.remove('show'));
-
-    // Open the specified step accordion
     const targetAccordion = document.getElementById(`collapse${stepCounter}`);
     if (targetAccordion) {
         targetAccordion.classList.add('show');  // Open the target accordion
@@ -235,25 +359,20 @@ function goBackToStep(stepCounter) {
 
     document.querySelectorAll('.accordion-button').forEach(button => button.classList.remove('accordion-button-active'));
     document.querySelector(`#heading${stepCounter} .accordion-button`).classList.add('accordion-button-active');
-
-    // Scroll to the target accordion for better user experience
     document.getElementById(`heading${stepCounter}`).scrollIntoView({behavior: 'smooth'});
 }
 
 function toggleDescription(button) {
-    const shortDescription = button.previousElementSibling; // Get the short description
-    const fullDescription = shortDescription.nextElementSibling; // Get the full description
-
-    // Toggle visibility
+    const shortDescription = button.previousElementSibling;
+    const fullDescription = shortDescription.nextElementSibling;
     if (fullDescription.classList.contains('d-none')) {
         // Show full description
         fullDescription.classList.remove('d-none');
         shortDescription.classList.add('d-none');
-        button.textContent = 'Hide'; // Change button text to "Hide"
+        button.textContent = 'Hide';
     } else {
-        // Hide full description
         fullDescription.classList.add('d-none');
         shortDescription.classList.remove('d-none');
-        button.textContent = 'Show'; // Change button text back to "Show"
+        button.textContent = 'Show';
     }
 }

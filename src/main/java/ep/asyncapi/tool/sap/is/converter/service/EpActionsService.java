@@ -1,14 +1,12 @@
 package ep.asyncapi.tool.sap.is.converter.service;
 
 import com.solace.cloud.ep.designer.ApiClient;
-import com.solace.cloud.ep.designer.model.Application;
-import com.solace.cloud.ep.designer.model.ApplicationDomain;
-import com.solace.cloud.ep.designer.model.ApplicationVersion;
+import com.solace.cloud.ep.designer.model.ApplicationDomainsResponse;
+import com.solace.cloud.ep.designer.model.ApplicationVersionsResponse;
+import com.solace.cloud.ep.designer.model.ApplicationsResponse;
 import com.solace.ep.codegen.asyncapi.mapper.AsyncApiToMuleDocMapper;
 import com.solace.ep.codegen.internal.model.MapMuleDoc;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationDTO;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationDomainDTO;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationVersionDTO;
+import ep.asyncapi.tool.sap.is.converter.models.*;
 import ep.asyncapi.tool.sap.is.converter.service.apis.SolaceCloudV0APIClient;
 import ep.asyncapi.tool.sap.is.converter.service.clients.ApplicationApiClientService;
 import ep.asyncapi.tool.sap.is.converter.service.clients.ApplicationDomainApiClientService;
@@ -24,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -39,10 +36,7 @@ public class EpActionsService {
     private final SapIFlowConverter sapIFlowConverter;
     private int runCount = 0;
 
-    public EpActionsService(final SolaceCloudV0APIClient solaceCloudV0APIClient,
-                            final ApplicationDomainApiClientService applicationDomainApiClientService,
-                            final ApplicationApiClientService applicationApiClientService,
-                            final SapIFlowConverter sapIFlowConverter) {
+    public EpActionsService(final SolaceCloudV0APIClient solaceCloudV0APIClient, final ApplicationDomainApiClientService applicationDomainApiClientService, final ApplicationApiClientService applicationApiClientService, final SapIFlowConverter sapIFlowConverter) {
         this.solaceCloudV0APIClient = solaceCloudV0APIClient;
         this.applicationDomainApiClientService = applicationDomainApiClientService;
         this.applicationApiClientService = applicationApiClientService;
@@ -62,32 +56,48 @@ public class EpActionsService {
         return false;
     }
 
-    public List<ApplicationDomainDTO> getAllApplicationDomains(final ApiClient apiClient) {
-        final List<ApplicationDomain> applicationDomains = applicationDomainApiClientService.getAllApplicationDomains(apiClient);
-        return applicationDomains.stream().map(applicationDomain -> {
+    public PaginatedApplicationDomainDTO getPaginatedApplicationDomains(final ApiClient apiClient, final int pageNumber) {
+        final ApplicationDomainsResponse applicationDomainsResponse = applicationDomainApiClientService.getPaginatedApplicationDomains(apiClient, pageNumber);
+        final PaginatedApplicationDomainDTO paginatedApplicationDomainDTO = new PaginatedApplicationDomainDTO();
+        paginatedApplicationDomainDTO.setApplicationDomainDTOList(applicationDomainsResponse.getData().stream().map(applicationDomain -> {
             ApplicationDomainDTO dto = new ApplicationDomainDTO();
             dto.setId(applicationDomain.getId());
             dto.setName(applicationDomain.getName());
             dto.setDescription(applicationDomain.getDescription());
             return dto;
-        }).collect(Collectors.toList());
-    }
-
-    public List<ApplicationDTO> getAllApplicationsForAppDomain(final ApiClient apiClient, final String appDomainId) {
-        final List<Application> applications = applicationApiClientService.getApplicationsForAppDomainId(apiClient, appDomainId);
-        return applications.stream().map(application -> {
-            ApplicationDTO dto = new ApplicationDTO();
-            dto.setId(application.getId());
-            dto.setName(application.getName());
-            dto.setNumberOfVersions(application.getNumberOfVersions());
-            return dto;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()));
+        paginatedApplicationDomainDTO.setTotalCount(applicationDomainsResponse.getMeta().getPagination().getCount());
+        paginatedApplicationDomainDTO.setTotalPages(applicationDomainsResponse.getMeta().getPagination().getTotalPages());
+        paginatedApplicationDomainDTO.setCurrentPage(applicationDomainsResponse.getMeta().getPagination().getPageNumber());
+        paginatedApplicationDomainDTO.setPageSize(applicationDomainsResponse.getMeta().getPagination().getPageSize());
+        return paginatedApplicationDomainDTO;
     }
 
 
-    public List<ApplicationVersionDTO> getApplicationVersionsForAppId(final ApiClient apiClient, final String applicationId) {
-        final List<ApplicationVersion> applicationVersions = applicationApiClientService.getApplicationsVersionsForAppId(apiClient, applicationId);
-        return applicationVersions.stream().map(applicationVersion -> {
+    public PaginatedApplicationDTO getAllApplicationsForAppDomain(final ApiClient apiClient, final String appDomainId, final int pageNumber) {
+        final ApplicationsResponse applicationResponse = applicationApiClientService.getApplicationsForAppDomainId(apiClient, appDomainId, pageNumber);
+        final PaginatedApplicationDTO paginatedApplicationDTO = new PaginatedApplicationDTO();
+        paginatedApplicationDTO.setApplicationDTOList(applicationResponse.getData().stream().map(application -> {
+                    ApplicationDTO dto = new ApplicationDTO();
+                    dto.setId(application.getId());
+                    dto.setName(application.getName());
+                    dto.setNumberOfVersions(application.getNumberOfVersions());
+                    return dto;
+                }).collect(Collectors.toList())
+
+        );
+        paginatedApplicationDTO.setTotalCount(applicationResponse.getMeta().getPagination().getCount());
+        paginatedApplicationDTO.setTotalPages(applicationResponse.getMeta().getPagination().getTotalPages());
+        paginatedApplicationDTO.setCurrentPage(applicationResponse.getMeta().getPagination().getPageNumber());
+        paginatedApplicationDTO.setPageSize(applicationResponse.getMeta().getPagination().getPageSize());
+        return paginatedApplicationDTO;
+    }
+
+
+    public PaginatedApplicationVersionDTO getApplicationVersionsForAppId(final ApiClient apiClient, final String applicationId, final int pageNumber) {
+        final ApplicationVersionsResponse applicationVersionsResponse = applicationApiClientService.getApplicationsVersionsForAppId(apiClient, applicationId, pageNumber);
+        final PaginatedApplicationVersionDTO paginatedVersionDTO = new PaginatedApplicationVersionDTO();
+        paginatedVersionDTO.setApplicationVersionDTOList(applicationVersionsResponse.getData().stream().map(applicationVersion -> {
             ApplicationVersionDTO dto = new ApplicationVersionDTO();
             dto.setId(applicationVersion.getId());
             dto.setDescription(applicationVersion.getDescription());
@@ -95,7 +105,12 @@ public class EpActionsService {
             dto.setState("1".equals(applicationVersion.getStateId()) ? "Draft" : "2".equals(applicationVersion.getStateId()) ? "Released" : "Unknown");
 
             return dto;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()));
+        paginatedVersionDTO.setTotalCount(applicationVersionsResponse.getMeta().getPagination().getCount());
+        paginatedVersionDTO.setTotalPages(applicationVersionsResponse.getMeta().getPagination().getTotalPages());
+        paginatedVersionDTO.setCurrentPage(applicationVersionsResponse.getMeta().getPagination().getPageNumber());
+        paginatedVersionDTO.setPageSize(applicationVersionsResponse.getMeta().getPagination().getPageSize());
+        return paginatedVersionDTO;
     }
 
 

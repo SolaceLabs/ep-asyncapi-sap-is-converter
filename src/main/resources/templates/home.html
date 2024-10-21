@@ -26,6 +26,11 @@
                 <div class="container-box">
                     <h4>Step 1 - EP Token validation</h4>
                     <div class="row align-items-center">
+
+                        <div th:if="${errorMessageFlag eq 'SESSION_EXPIRED'}" id="sessionExpiredError" class="alert alert-danger">
+                            <p th:text="Your current session has been invalidated, please restart your journey again."></p>
+                        </div>
+
                         <form id="epTokenForm" class="d-flex flex-wrap align-items-center"
                               th:action="@{/validateUserEPToken}" method="post">
                             <label for="epToken" class="col-sm-3 col-form-label align-self-center">Solace Event Portal
@@ -76,7 +81,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="applicationDomainDTO, index : ${applicationDomainDTOList}">
+                            <tr th:each="applicationDomainDTO, index : ${paginatedApplicationDomainDTO.applicationDomainDTOList}">
                                 <td th:text="${index.index + 1}"></td>
                                 <td th:text="${applicationDomainDTO.name}"></td>
                                 <td>
@@ -100,11 +105,25 @@
                             </tr>
                             </tbody>
                         </table>
+                        <div class="pagination-controls appDomains d-flex justify-content-end align-items-center mt-3">
+                            <button id="appDomainsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                    onclick="loadAppDomainsPreviousPage()" disabled>
+                                Previous
+                            </button>
+                            <span id="appDomainsCurrentPage" class="me-1">1</span>
+                            /
+                            <span id="appDomainsTotalPages" th:text="${paginatedApplicationDomainDTO.totalPages}"
+                                  class="ms-1"></span>
+                            <button id="appDomainsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                    th:data-app-domain-total-pages="${paginatedApplicationDomainDTO.totalPages}"
+                                    onclick="loadAppDomainsNextPage(this)">
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 3: Select Application -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
                     <div class="accordion-button collapsed accordion-button-active" style="cursor: default;"
@@ -129,12 +148,26 @@
                             <!-- Application rows will be dynamically populated here -->
                             </tbody>
                         </table>
-                        <button class="btn btn-secondary mb-3" onclick="goBackToStep('One')">Back</button>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <button class="btn btn-secondary" onclick="goBackToStep('One')">Back</button>
+                            <div class="pagination-controls apps d-flex align-items-center">
+                                <button id="appsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                        data-direction="-1" onclick="loadAppsPage(this)" disabled>
+                                    Previous
+                                </button>
+                                <span id="appsCurrentPage" class="me-1">1</span>
+                                /
+                                <span id="appsTotalPages" class="ms-1"></span>
+                                <button id="appsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                        data-direction="1" onclick="loadAppsPage(this)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Step 4: Select Version for SAP IS export -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingThree">
                     <div class="accordion-button collapsed" style="cursor: default;" aria-expanded="false"
@@ -159,7 +192,22 @@
                             <!-- Version rows will be dynamically populated here -->
                             </tbody>
                         </table>
-                        <button class="btn btn-secondary mb-3" onclick="goBackToStep('Two')">Back</button>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <button class="btn btn-secondary mb-3" onclick="goBackToStep('Two')">Back</button>
+                            <div class="pagination-controls appVersions d-flex align-items-center">
+                                <button id="appVersionsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                        data-direction="-1" onclick="loadAppVersions(this)" disabled>
+                                    Previous
+                                </button>
+                                <span id="appVersionsCurrentPage" class="me-1">1</span>
+                                /
+                                <span id="appVersionsTotalPages" class="ms-1"></span>
+                                <button id="appVersionsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                        data-direction="1" onclick="loadAppVersions(this)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

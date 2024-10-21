@@ -9,6 +9,9 @@ spring:
     suffix: .html
 server:
   port: 9003
+  servlet:
+    session:
+      timeout: 60m
 
 solace:
   api:

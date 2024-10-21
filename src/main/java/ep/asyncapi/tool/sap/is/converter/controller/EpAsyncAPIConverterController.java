@@ -2,10 +2,10 @@ package ep.asyncapi.tool.sap.is.converter.controller;
 
 import com.solace.cloud.ep.designer.ApiClient;
 import ep.asyncapi.tool.sap.is.converter.commons.ApiClientUtil;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationDTO;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationDomainDTO;
-import ep.asyncapi.tool.sap.is.converter.models.ApplicationVersionDTO;
 import ep.asyncapi.tool.sap.is.converter.models.EpTokenModel;
+import ep.asyncapi.tool.sap.is.converter.models.PaginatedApplicationDTO;
+import ep.asyncapi.tool.sap.is.converter.models.PaginatedApplicationDomainDTO;
+import ep.asyncapi.tool.sap.is.converter.models.PaginatedApplicationVersionDTO;
 import ep.asyncapi.tool.sap.is.converter.service.EpActionsService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 @Slf4j
@@ -36,10 +34,13 @@ public class EpAsyncAPIConverterController {
     }
 
     @GetMapping
-    public String homePage(final Model model) {
+    public String homePage(@RequestParam(required = false, defaultValue = "") String error, final Model model) {
         log.debug("Loading homepage for user");
         EpTokenModel epTokenModel = EpTokenModel.builder().build();
         model.addAttribute("epTokenModel", epTokenModel);
+        if (StringUtils.hasText(error) && "SESSION_EXPIRED".equals(error)) {
+            model.addAttribute("errorMessageFlag", error);
+        }
         return "home";
     }
 
@@ -56,8 +57,8 @@ public class EpAsyncAPIConverterController {
                 ApiClient apiClient = apiClientUtil.initializeApiClient(epToken);
                 httpSession.setAttribute("apiClient", apiClient);
                 log.info("Retrieving application domains for user token");
-                List<ApplicationDomainDTO> applicationDomainDTOList = epActionsService.getAllApplicationDomains(apiClient);
-                model.addAttribute("applicationDomainDTOList", applicationDomainDTOList);
+                final PaginatedApplicationDomainDTO paginatedApplicationDomainDTO = epActionsService.getPaginatedApplicationDomains(apiClient, 1);
+                model.addAttribute("paginatedApplicationDomainDTO", paginatedApplicationDomainDTO);
             }
         } else {
             log.error("User EP Token input is empty");
@@ -67,27 +68,45 @@ public class EpAsyncAPIConverterController {
         return "home";
     }
 
+    @GetMapping(path = "/applicationDomains", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Object getPaginatedApplicationDomains(final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
+        log.info("Retrieving paginated application domains for user");
+        final ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
+        if (ObjectUtils.isEmpty(apiClient)) {
+            return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+        }
+        return epActionsService.getPaginatedApplicationDomains(apiClient, pageNumber);
+    }
+
     @GetMapping(path = "/{appDomainId}/applications", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<ApplicationDTO> getApplicationsForAppDomain(@PathVariable String appDomainId, final HttpSession httpSession) {
+    public Object getApplicationsForAppDomain(@PathVariable String appDomainId, final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
         if (StringUtils.hasText(appDomainId)) {
             log.info("Retrieving applications for user app domain id");
-            ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
-            return epActionsService.getAllApplicationsForAppDomain(apiClient, appDomainId);
+            final ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
+            if (ObjectUtils.isEmpty(apiClient)) {
+                return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+            }
+            return epActionsService.getAllApplicationsForAppDomain(apiClient, appDomainId, pageNumber);
         }
-        return Collections.EMPTY_LIST;
+        return new PaginatedApplicationDTO();
     }
 
 
     @GetMapping(path = "/{appDomainId}/applications/{applicationId}/versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<ApplicationVersionDTO> getVersionsForApplication(@PathVariable final String appDomainId, @PathVariable final String applicationId, final HttpSession httpSession) {
+    public Object getVersionsForApplication(@PathVariable final String appDomainId, @PathVariable final String applicationId,
+                                            final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
         if (StringUtils.hasText(appDomainId) && StringUtils.hasText(applicationId)) {
             log.info("Retrieving applications versions for user app id");
             ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
-            return epActionsService.getApplicationVersionsForAppId(apiClient, applicationId);
+            if (ObjectUtils.isEmpty(apiClient)) {
+                return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+            }
+            return epActionsService.getApplicationVersionsForAppId(apiClient, applicationId, pageNumber);
         }
-        return Collections.EMPTY_LIST;
+        return new PaginatedApplicationVersionDTO();
     }
 
     @GetMapping("/{appDomainId}/applications/{appId}/versions/{appVersionId}/isArtefact")
