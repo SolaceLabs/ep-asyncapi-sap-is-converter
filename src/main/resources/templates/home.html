@@ -27,8 +27,8 @@
                     <h4>Step 1 - EP Token validation</h4>
                     <div class="row align-items-center">
 
-                        <div th:if="${errorMessageFlag eq 'SESSION_EXPIRED'}" id="sessionExpiredError" class="alert alert-danger">
-                            <p th:text="Your current session has been invalidated, please restart your journey again."></p>
+                        <div id="sessionExpiredError" class="alert alert-danger d-none">
+                            <p>Your current session has been invalidated, please restart your journey again.</p>
                         </div>
 
                         <form id="epTokenForm" class="d-flex flex-wrap align-items-center"
@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                         </form>
-                        <div class="col-sm-3 extraTopPadding" th:if="${isUserEpTokenValidated != null}">
+                        <div class="col-sm-3 extraTopPadding" th:if="${isUserEpTokenValidated != null}" id="userEpTokenValidationMessage">
                             <div th:class="${isUserEpTokenValidated ? 'alert alert-success' : 'alert alert-danger'}"
                                  role="alert">
                                 <span th:text="${isUserEpTokenValidated ? 'Token validated successfully!' : 'Failed to validate token.'}"></span>

@@ -4,13 +4,13 @@ function cancelEpForm() {
     tokenInput.classList.remove("is-invalid");
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
-    var errorFlag = /*[[${errorMessageFlag}]]*/ '';
+    const errorFlag = /*[[${errorMessageFlag}]]*/ '';
     if (errorFlag === 'SESSION_EXPIRED') {
-        var errorSection = document.getElementById('sessionExpiredError');
+        const errorSection = document.getElementById('sessionExpiredError');
         if (errorSection) {
-            errorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            errorSection.scrollIntoView({behavior: 'smooth', block: 'start'});
         }
     }
 });
@@ -140,6 +140,11 @@ function processAppListFetch(appDomainId, appDomainName, appListPageNumber) {
     fetch(`/${appDomainId}/applications?pageNumber=${appListPageNumber}`)
         .then(handleErrors)
         .then(data => {
+            if (data.error === "SESSION_EXPIRED") {
+                // Handle session expiration
+                showSessionExpiredError();
+                return;
+            }
             populateTableForApplications('.applicationList tbody', data.applicationDTOList, generateAppRows, appDomainName, appDomainId);
             updateAppsPagination(data.totalPages, data.currentPage, appDomainName, appDomainId);
         })
@@ -257,9 +262,16 @@ function generateISArtefactDownload(selectedAppVersionButton) {
 
 function handleErrors(response) {
     if (!response.ok) {
+        // If it's a 401 (Unauthorized), we assume session expired
+        if (response.status === 401) {
+            return response.json().then(data => {
+                return {error: "SESSION_EXPIRED"}; // Add error flag
+            });
+        }
+        // For other types of errors, throw them as usual
         throw new Error(`Network response was not ok: ${response.statusText}`);
     }
-    return response.json();
+    return response.json(); // Return the valid JSON response
 }
 
 function populateTableForApplications(tableSelector, data, rowGenerator, appDomainName, appDomainId) {
@@ -375,4 +387,24 @@ function toggleDescription(button) {
         shortDescription.classList.remove('d-none');
         button.textContent = 'Show';
     }
+}
+
+function showSessionExpiredError() {
+    const sessionExpiredError = document.getElementById('sessionExpiredError');
+    if (sessionExpiredError) {
+        sessionExpiredError.classList.remove('d-none');
+        sessionExpiredError.scrollIntoView({behavior: 'smooth'});
+    }
+    const userEpTokenValidationMessage = document.getElementById('userEpTokenValidationMessage');
+    userEpTokenValidationMessage.classList.add('d-none');
+    closeAndClearAccordions();
+}
+
+function closeAndClearAccordions() {
+    const accordions = document.querySelectorAll('.accordion-collapse');
+    accordions.forEach(accordion => accordion.classList.remove('show'));
+
+    // Clear tables or other content inside accordions if needed
+    document.querySelector('.applicationList tbody').innerHTML = '';
+    document.querySelector('.epObjectsTable tbody').innerHTML = '';
 }

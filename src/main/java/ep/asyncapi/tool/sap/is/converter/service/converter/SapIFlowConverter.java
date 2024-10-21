@@ -6,7 +6,6 @@ import com.solace.ep.codegen.internal.model.MapMuleDoc;
 import com.solace.ep.codegen.internal.model.MapSubFlowEgress;
 import com.solace.ep.codegen.internal.model.SchemaInstance;
 import com.solace.ep.codegen.sap.iflow.SapIFlowGenerator;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,7 +40,7 @@ public class SapIFlowConverter {
         try {
             final String integrationFlowFileContent = generateIntegrationFlowFileContent(mapMuleDoc);
             String title = mapMuleDoc.getGlobalProperties().getOrDefault("epApplicationVersionTitle", "");
-            final String iFlowFilename = ( title.isBlank() ? "NAME_NOT_FOUND" : title ) + ".iflw";
+            final String iFlowFilename = (title.isBlank() ? "NAME_NOT_FOUND" : title) + ".iflw";
             final File integarationFlowFile = new File(integrationFlowSubDirectory, iFlowFilename);
             FileUtils.writeStringToFile(integarationFlowFile, integrationFlowFileContent, StandardCharsets.UTF_8);
         } catch (final IOException ioException) {
@@ -63,15 +62,14 @@ public class SapIFlowConverter {
         try {
             mapMuleDoc.getMapEgressSubFlows().forEach(mapSubFlowEgress -> {
                 final SchemaInstance schemaInstance = mapMuleDoc.getSchemaMap().get(mapSubFlowEgress.getJsonSchemaReference());
-                final String messageName = mapSubFlowEgress.getMessageName();
-                createAndAddSourceToDestinationFormatMmapFile(mappingSubDirectory, messageName, schemaInstance);
+                createAndAddSourceToDestinationFormatMmapFile(mappingSubDirectory, schemaInstance);
             });
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.createSourceToDestinationFormatMmapFiles", exception);
         }
     }
 
-    private void createAndAddSourceToDestinationFormatMmapFile(final File mappingSubDirectory, final String messageName, final SchemaInstance schemaInstance) {
+    private void createAndAddSourceToDestinationFormatMmapFile(final File mappingSubDirectory, final SchemaInstance schemaInstance) {
         try {
             final String sourceToDestinationFormatMmapFileContent = generateSourceToDestinationFormatMmapFileContent(schemaInstance);
             // final File sourceToDestinationFormatMmapFile = new File(mappingSubDirectory, messageName + "SourceToDestinationFormat.mmap");
@@ -200,7 +198,7 @@ public class SapIFlowConverter {
 
             JsonNode definitionsNode = jsonNode.get("definitions");
             String escapedDefinitionsString = "{ }";
-            if ( definitionsNode != null ) {
+            if (definitionsNode != null) {
                 String definitionsString = objectMapper.writeValueAsString(definitionsNode);
                 escapedDefinitionsString = Matcher.quoteReplacement(definitionsString);
             }
@@ -309,28 +307,28 @@ public class SapIFlowConverter {
     }
 
     public void createReadmeFile(final String appName, final String appSemanticVersion, final String appDescription, final File mainDirectory) {
-      try {
-          final String readme = generateReadmeFileContent(appName, appSemanticVersion, appDescription);
-          File readmeFile = new File(mainDirectory, "README.md");
-          FileUtils.writeStringToFile(readmeFile, readme, StandardCharsets.UTF_8);
-      } catch (IOException ioException) {
-          log.error("Error encountered in SapIFlowConverter.createReadmeFile", ioException);
-      }
-  }
+        try {
+            final String readme = generateReadmeFileContent(appName, appSemanticVersion, appDescription);
+            File readmeFile = new File(mainDirectory, "README.md");
+            FileUtils.writeStringToFile(readmeFile, readme, StandardCharsets.UTF_8);
+        } catch (IOException ioException) {
+            log.error("Error encountered in SapIFlowConverter.createReadmeFile", ioException);
+        }
+    }
 
     private String generateReadmeFileContent(final String appName, final String appSemanticVersion, final String appDescription) {
-      try {
-          final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.README_PATH);
-          String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-          templateContent = templateContent.replace("<APP_NAME>", appName);
-          templateContent = templateContent.replace("<APP_SEMANTIC_VERSION_ID>", appSemanticVersion);
-          templateContent = templateContent.replace("<APP_DESCRIPTION>", appDescription);
-          return templateContent;
-      } catch (Exception exception) {
-          log.error("Error encountered in SapIFlowConverter.generateReadmeFileContent", exception);
-          return StringUtils.EMPTY;
-      }
-  }
+        try {
+            final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.README_PATH);
+            String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            templateContent = templateContent.replace("<APP_NAME>", appName);
+            templateContent = templateContent.replace("<APP_SEMANTIC_VERSION_ID>", appSemanticVersion);
+            templateContent = templateContent.replace("<APP_DESCRIPTION>", appDescription);
+            return templateContent;
+        } catch (Exception exception) {
+            log.error("Error encountered in SapIFlowConverter.generateReadmeFileContent", exception);
+            return StringUtils.EMPTY;
+        }
+    }
 
     public void createProjectFile(final String projectName, final File mainDirectory) {
         try {
@@ -358,6 +356,7 @@ public class SapIFlowConverter {
      * This method will create script files:
      * - composeTopic.groovy (static)
      * - topicParameters.groovy -- generated dynamically with topic parameters in code, one script function per event
+     *
      * @param scriptSubDirectory
      * @param mapMuleDoc
      */
@@ -366,12 +365,12 @@ public class SapIFlowConverter {
             final InputStream composeTopicScriptInputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_COMPOSE_TOPIC_FILE_PATH);
             File composeTopicScriptFile = new File(scriptSubDirectory, "composeTopic.groovy");
             FileUtils.copyInputStreamToFile(composeTopicScriptInputStream, composeTopicScriptFile);
-            
+
             if (mapMuleDoc.getMapEgressSubFlows().isEmpty()) {
                 return;
             } else {
                 int count = 0;
-                for (MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows() ) {
+                for (MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows()) {
                     if (pub.getSetVariables().size() > 0) {
                         count++;
                     }
@@ -382,35 +381,35 @@ public class SapIFlowConverter {
             }
 
             File topicParametersScriptFile = new File(scriptSubDirectory, "topicParameters.groovy");
-            FileUtils.writeStringToFile(topicParametersScriptFile, SapIflorConverterConstants.TOPIC_PARAMETERS_GROOVY_HEADER, "UTF-8", false );
+            FileUtils.writeStringToFile(topicParametersScriptFile, SapIflorConverterConstants.TOPIC_PARAMETERS_GROOVY_HEADER, "UTF-8", false);
             int outputChannel = 0;  // , functionCount = 0;
-            for ( MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows() ) {
-                if ( pub.getSetVariables().size() == 0 ) {
+            for (MapSubFlowEgress pub : mapMuleDoc.getMapEgressSubFlows()) {
+                if (pub.getSetVariables().size() == 0) {
                     outputChannel++;
                     continue;
                 }
-                if ( pub.isPublishToQueue() ) {
+                if (pub.isPublishToQueue()) {
                     outputChannel++;
                     continue;
                 }
                 String topicParametersGroovyFx = SapIflorConverterConstants.TOPIC_PARAMETERS_GROOVY_FX;
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(
-                    SapIflorConverterConstants.TP_TOKEN_EVENT_NAME, 
-                    pub.getMessageName() != null ? pub.getMessageName() : "UNKNOWN"
+                        SapIflorConverterConstants.TP_TOKEN_EVENT_NAME,
+                        pub.getMessageName() != null ? pub.getMessageName() : "UNKNOWN"
                 );
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(
-                    SapIflorConverterConstants.TP_TOKEN_TOPIC_ADDRESS_PATTERN, 
-                    pub.getPublishAddress() != null ? pub.getPublishAddress() : "UNKNOWN"
+                        SapIflorConverterConstants.TP_TOKEN_TOPIC_ADDRESS_PATTERN,
+                        pub.getPublishAddress() != null ? pub.getPublishAddress() : "UNKNOWN"
                 );
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(
-                    SapIflorConverterConstants.TP_TOKEN_FX_INSTANCE, 
-                    Integer.toString(outputChannel++)
+                        SapIflorConverterConstants.TP_TOKEN_FX_INSTANCE,
+                        Integer.toString(outputChannel++)
                 );
                 StringBuilder varsList = new StringBuilder();
                 StringBuilder jsonPath = new StringBuilder();
                 StringBuilder setValue = new StringBuilder();
                 int varIndex = 1;
-                for( Map.Entry<String, String> var : pub.getSetVariables().entrySet() ) {
+                for (Map.Entry<String, String> var : pub.getSetVariables().entrySet()) {
                     final String topicVar = var.getKey();
                     varsList.append(String.format(SapIflorConverterConstants.TOPIC_PARAMETERS_VAR_LIST_PATTERN, topicVar));
                     jsonPath.append(String.format(SapIflorConverterConstants.TOPIC_PARAMETERS_JSON_PATH_PATTERN, topicVar, varIndex));
@@ -421,7 +420,8 @@ public class SapIFlowConverter {
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_JSON_PATH, jsonPath.toString());
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_SET_VALUE, setValue.toString());
                 FileUtils.writeStringToFile(topicParametersScriptFile, topicParametersGroovyFx, "UTF-8", true);
-            };
+            }
+            ;
         } catch (IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createDynamicTopicScriptFiles", ioException);
         }

@@ -15,7 +15,7 @@ public class ApplicationDomainApiClientService {
         try {
             return applicationDomainsApi.getApplicationDomains(10, pageNumber, null, null, null);
         } catch (Exception exception) {
-            log.error("Error encountered in ApplicationDomainApiClientService.getAllApplicationDomains, Exception:{}", exception);
+            log.error("Error encountered in ApplicationDomainApiClientService.getAllApplicationDomains, Exception:", exception);
             return null;
         }
 

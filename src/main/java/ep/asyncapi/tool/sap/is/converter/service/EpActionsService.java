@@ -193,7 +193,7 @@ public class EpActionsService {
     private void zip(File directory, String baseName, ZipOutputStream zos) throws IOException {
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
-                zip(file, (baseName.length() > 0 ? (baseName + File.separator) : "") + file.getName(), zos);
+                zip(file, (baseName.isEmpty() ? (baseName + File.separator) : "") + file.getName(), zos);
             } else {
                 byte[] buffer = new byte[1024];
                 try (FileInputStream fis = new FileInputStream(file)) {

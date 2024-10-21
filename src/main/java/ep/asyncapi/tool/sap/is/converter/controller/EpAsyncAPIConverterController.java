@@ -10,6 +10,7 @@ import ep.asyncapi.tool.sap.is.converter.service.EpActionsService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,8 +19,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 @Controller
 @Slf4j
@@ -70,49 +70,56 @@ public class EpAsyncAPIConverterController {
 
     @GetMapping(path = "/applicationDomains", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getPaginatedApplicationDomains(final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
+    public ResponseEntity<?> getPaginatedApplicationDomains(final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
         log.info("Retrieving paginated application domains for user");
         final ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
         if (ObjectUtils.isEmpty(apiClient)) {
-            return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("error", "SESSION_EXPIRED"));
         }
-        return epActionsService.getPaginatedApplicationDomains(apiClient, pageNumber);
+        return ResponseEntity.ok(epActionsService.getPaginatedApplicationDomains(apiClient, pageNumber));
     }
 
     @GetMapping(path = "/{appDomainId}/applications", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getApplicationsForAppDomain(@PathVariable String appDomainId, final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
+    public ResponseEntity<?> getApplicationsForAppDomain(@PathVariable String appDomainId, final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
         if (StringUtils.hasText(appDomainId)) {
             log.info("Retrieving applications for user app domain id");
             final ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
             if (ObjectUtils.isEmpty(apiClient)) {
-                return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("error", "SESSION_EXPIRED"));
             }
-            return epActionsService.getAllApplicationsForAppDomain(apiClient, appDomainId, pageNumber);
+            return ResponseEntity.ok(epActionsService.getAllApplicationsForAppDomain(apiClient, appDomainId, pageNumber));
         }
-        return new PaginatedApplicationDTO();
+        return ResponseEntity.ok(new PaginatedApplicationDTO());
     }
 
 
     @GetMapping(path = "/{appDomainId}/applications/{applicationId}/versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Object getVersionsForApplication(@PathVariable final String appDomainId, @PathVariable final String applicationId,
-                                            final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
+    public ResponseEntity<?> getVersionsForApplication(@PathVariable final String appDomainId, @PathVariable final String applicationId,
+                                                       final HttpSession httpSession, @RequestParam(defaultValue = "1") int pageNumber) {
         if (StringUtils.hasText(appDomainId) && StringUtils.hasText(applicationId)) {
             log.info("Retrieving applications versions for user app id");
             ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
             if (ObjectUtils.isEmpty(apiClient)) {
-                return "redirect:/?error=" + URLEncoder.encode("SESSION_EXPIRED", StandardCharsets.UTF_8);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("error", "SESSION_EXPIRED"));
             }
-            return epActionsService.getApplicationVersionsForAppId(apiClient, applicationId, pageNumber);
+            return ResponseEntity.ok(epActionsService.getApplicationVersionsForAppId(apiClient, applicationId, pageNumber));
         }
-        return new PaginatedApplicationVersionDTO();
+        return ResponseEntity.ok(new PaginatedApplicationVersionDTO());
     }
 
     @GetMapping("/{appDomainId}/applications/{appId}/versions/{appVersionId}/isArtefact")
-    public ResponseEntity<byte[]> generateISArtefactDownload(@PathVariable final String appDomainId, @PathVariable final String appId, @PathVariable final String appVersionId, final HttpSession httpSession) {
+    public ResponseEntity<?> generateISArtefactDownload(@PathVariable final String appDomainId, @PathVariable final String appId, @PathVariable final String appVersionId, final HttpSession httpSession) {
         log.info("Generating IS artefact for user app version");
         ApiClient apiClient = apiClientUtil.getApiClientFromSession(httpSession);
+        if (ObjectUtils.isEmpty(apiClient)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("error", "SESSION_EXPIRED"));
+        }
         byte[] appVersionIsWorkflowArtefact = epActionsService.generateISWorkflowArtefactForAppVersion(apiClient, appVersionId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
