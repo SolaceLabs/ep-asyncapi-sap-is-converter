@@ -2,25 +2,7 @@
 <parameters>
   <parameter>
     <key/>
-    <name>regionId</name>
-    <type>xsd:string</type>
-    <isRequired>false</isRequired>
-    <constraint/>
-    <description/>
-    <additionalMetadata/>
-  </parameter>
-  <parameter>
-    <key/>
     <name>solace_host</name>
-    <type>xsd:string</type>
-    <isRequired>false</isRequired>
-    <constraint/>
-    <description/>
-    <additionalMetadata/>
-  </parameter>
-  <parameter>
-    <key/>
-    <name>composedTopic</name>
     <type>xsd:string</type>
     <isRequired>false</isRequired>
     <constraint/>
@@ -68,7 +50,6 @@
   <param_references>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::password" attribute_uilabel="Password Secure Alias" param_key="solace_password_alias"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::messageVpn" attribute_uilabel="Message VPN" param_key="solace_vpn"/>
-    <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::destinationName" attribute_uilabel="Destination Name" param_key="composedTopic"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::host" attribute_uilabel="Host" param_key="solace_host"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::authenticationType" attribute_uilabel="Authentication Type" param_key="solace_authentication_type"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::username" attribute_uilabel="Username" param_key="solace_username"/>
@@ -79,7 +60,6 @@
     <reference attribute_category="EventMeshSender" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::username" attribute_uilabel="Username" param_key="solace_username"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::password" attribute_uilabel="Password Secure Alias" param_key="solace_password_alias"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::messageVpn" attribute_uilabel="Message VPN" param_key="solace_vpn"/>
-    <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::destinationName" attribute_uilabel="Destination Name" param_key="composedTopic"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::host" attribute_uilabel="Host" param_key="solace_host"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::authenticationType" attribute_uilabel="Authentication Type" param_key="solace_authentication_type"/>
     <reference attribute_category="EventMeshReceiver" attribute_id="ctype::Adapter/cname::SolacePubSubPlus/vendor::Solace/version::1.2.0/attrId::username" attribute_uilabel="Username" param_key="solace_username"/>
