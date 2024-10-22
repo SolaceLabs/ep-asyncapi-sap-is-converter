@@ -420,8 +420,7 @@ public class SapIFlowConverter {
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_JSON_PATH, jsonPath.toString());
                 topicParametersGroovyFx = topicParametersGroovyFx.replace(SapIflorConverterConstants.TP_TOKEN_VARS_SET_VALUE, setValue.toString());
                 FileUtils.writeStringToFile(topicParametersScriptFile, topicParametersGroovyFx, "UTF-8", true);
-            }
-            ;
+            };
         } catch (IOException ioException) {
             log.error("Error encountered in SapIFlowConverter.createDynamicTopicScriptFiles", ioException);
         }
