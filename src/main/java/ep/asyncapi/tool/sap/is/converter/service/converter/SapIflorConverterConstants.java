@@ -89,7 +89,7 @@ public class SapIflorConverterConstants {
                 "\n" + //
                 "\t// get a map of iflow properties\n" + //
                 "\tdef map = message.getProperties()\n" + //
-                "\tdef refernceID = map.get(\"ReferenceId\")\t\t// ReferenceID could be an Identifier\n" + //
+                "\tdef referenceID = map.get(\"ReferenceId\")\t\t// ReferenceID could be an Identifier\n" + //
                 "\tdef logException = map.get(\"ExceptionLogging\")\t// Externalized parameter \"ExceptionLogging\" is set to \"True\" to log exceptions\n" + //
                 "\tdef attachID = \"\"\n" + //
                 "\tdef errordetails = \"\"\n" + //
@@ -100,13 +100,13 @@ public class SapIflorConverterConstants {
                 "\t{\n" + //
                 "\t\t// save the error response as a message attachment \n" + //
                 "\t\tdef messageLog = messageLogFactory.getMessageLog(message);\n" + //
-                "\t\tif (refernceID == null || refernceID == \"\" )\n" + //
+                "\t\tif (referenceID == null || referenceID == \"\" )\n" + //
                 "\t\t{\n" + //
                 "\t\t\terrordetails = \"The  replication failed because of the following error:  \" + ex.toString()\n" + //
                 "\t\t\tattachID  = \"Error Details\"\n" + //
                 "\t\t} else {\n" + //
-                "\t\t\terrordetails = \"The replication  '\" + refernceID + \"' failed because of the following error:  \" + ex.toString()\n" + //
-                "\t\t\tattachID  = \"Error Details'\" + refernceID + \"'\"\t\n" + //
+                "\t\t\terrordetails = \"The replication  '\" + referenceID + \"' failed because of the following error:  \" + ex.toString()\n" + //
+                "\t\t\tattachID  = \"Error Details'\" + referenceID + \"'\"\t\n" + //
                 "\t\t}\n" + //
                 "\n" + //
                 "\t\tif (logException != null && logException.equalsIgnoreCase(\"TRUE\")) \n" + //
@@ -114,17 +114,9 @@ public class SapIflorConverterConstants {
                 "\t\t\tmessageLog.addAttachmentAsString(attachID, errordetails, \"text/plain\");\n" + //
                 "\t\t}\n" + //
                 "\n" + //
-                "\t\t// messageLog.addAttachmentAsString(\"Some Details\", \"These are some text details, how about that?\", \"text/plain\")\n" + //
-                "\n" + //
-                "\t\tmessageLog.setStringProperty(\"String Property 1\", \"This is some string data, which means text, doesn't it?\")\n" + //
-                "\t\tmessageLog.setStringProperty(\"String Property 2\", \"This is some string data, which means text, doesn't it?\")\n" + //
-                "\t\t\n" + //
-                "\t\tmessageLog.addCustomHeaderProperty(\"Custom Header Property 1\", \"This is custom header property number 1\")\n" + //
-                "\t\tmessageLog.addCustomHeaderProperty(\"Custom Header Property 2\", \"This is custom header property number 2\")\n" + //
-                "\n" + //
-                "\t\t// message.setProperty(\"http.ResponseBody\", errordetails.replaceAll(\"\\\\<\\\\?xml(.+?)\\\\?\\\\>\", \"\").trim());\n" + //
-                "\t\t// message.setBody(message.getBody());\n" + //
-                "\t\t// message.setProperty(\"http.StatusCode\", message.getHeaders().get(\"status\").toString()); \n" + //
+                "\t\tmessage.setProperty(\"http.ResponseBody\", errordetails.replaceAll(\"\\\\<\\\\?xml(.+?)\\\\?\\\\>\", \"\").trim());\n" + //
+                "\t\tmessage.setBody(message.getBody());\n" + //
+                "\t\tmessage.setProperty(\"http.StatusCode\", message.getHeaders().get(\"status\").toString()); \n" + //
                 "\t} else {\n" + //
                 "\t\tmessageLog.setProperty\n" + //
                 "\t}\n" + //
