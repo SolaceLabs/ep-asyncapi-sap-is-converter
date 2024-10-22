@@ -11,124 +11,209 @@
 <body>
 
 
-</div>
 <header class="bg-primary py-3 header">
     <div class="container d-flex align-items-center justify-content-center">
-        <img src="/images/solace-logo.png"/>
+        <img src="/images/solace-logo.png" alt="Solace logo"/>
         <h1>Solace Event Portal - SAP IS Integrator</h1>
-        <img src="/images/sap-logo.png"/>
+        <img src="/images/sap-logo.png" alt="SAP logo"/>
     </div>
 </header>
 
-<!-- Main Content -->
 <main class="container-fluid my-5">
-    <div class="row">
-        <div class="col-sm-10">
-            <div class="container-box">
-                <h4>Step 1 - EP Token validation</h4>
-                <div class="row align-items-center">
-                    <form id="epTokenForm" class="d-flex flex-wrap align-items-center"
-                          th:action="@{/validateUserEPToken}" method="post">
-                        <label for="epToken" class="col-sm-3 col-form-label align-self-center">Solace Event Portal
-                            Token</label>
-                        <div class="col-sm-8">
-                            <div class="position-relative">
-                                <input type="password" id="epToken" data-bs-toggle="popover" class="form-control"
-                                       placeholder="Enter your token here" th:field="${epTokenModel.epToken}"/>
-                                <div class="d-flex justify-content-between mt-2">
-                                    <button type="button" class="btn btn-secondary" onclick="cancelEpForm()">Cancel
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">Validate token</button>
+    <section id="epTokenValidator">
+        <div class="row">
+            <div class="col-sm-10">
+                <div class="container-box">
+                    <h4>Step 1 - EP Token validation</h4>
+                    <div class="row align-items-center">
+
+                        <div id="sessionExpiredError" class="alert alert-danger d-none">
+                            <p>Your current session has expired, please restart your journey again.</p>
+                        </div>
+
+                        <form id="epTokenForm" class="d-flex flex-wrap align-items-center"
+                              th:action="@{/validateUserEPToken}" method="post">
+                            <label for="epToken" class="col-sm-3 col-form-label align-self-center">Solace Event Portal
+                                Token</label>
+                            <div class="col-sm-8">
+                                <div class="position-relative">
+                                    <input type="password" id="epToken" data-bs-toggle="popover" class="form-control"
+                                           placeholder="Enter your token here" th:field="${epTokenModel.epToken}"/>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <button type="button" class="btn btn-secondary" onclick="cancelEpForm()">Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">Validate token</button>
+                                    </div>
                                 </div>
                             </div>
+                        </form>
+                        <div class="col-sm-3 extraTopPadding" th:if="${isUserEpTokenValidated != null}" id="userEpTokenValidationMessage">
+                            <div th:class="${isUserEpTokenValidated ? 'alert alert-success' : 'alert alert-danger'}"
+                                 role="alert">
+                                <span th:text="${isUserEpTokenValidated ? 'Token validated successfully!' : 'Failed to validate token.'}"></span>
+                            </div>
                         </div>
-                    </form>
-                    <div class="col-sm-3 extraTopPadding" th:if="${isUserEpTokenValidated != null}">
-                        <div th:class="${isUserEpTokenValidated ? 'alert alert-success' : 'alert alert-danger'}"
-                             role="alert">
-                            <span th:text="${isUserEpTokenValidated ? 'Token validated successfully!' : 'Failed to validate token.'}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row" th:if="${isUserEpTokenValidated}">
+        <div class="accordion" id="epArtifactsDisplayAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <div class="accordion-button" style="cursor: default;" aria-expanded="true"
+                         aria-controls="collapseOne">
+                        Step 2 - Select Application Domain
+                    </div>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                     data-bs-parent="#epArtifactsDisplayAccordion">
+                    <div class="accordion-body applicationDomainList">
+                        <table class="table epObjectsTable">
+                            <thead>
+                            <tr>
+                                <th>Sr. No</th>
+                                <th>Application Domain Name</th>
+                                <th>Application Domain Description</th>
+                                <th>Select</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="applicationDomainDTO, index : ${paginatedApplicationDomainDTO.applicationDomainDTOList}">
+                                <td th:text="${index.index + 1}"></td>
+                                <td th:text="${applicationDomainDTO.name}"></td>
+                                <td>
+                                    <span class="short-description"
+                                          th:text="${#strings.abbreviate(applicationDomainDTO.description, 200)}"></span>
+                                    <span class="full-description d-none"
+                                          th:text="${applicationDomainDTO.description}"></span>
+                                    <button type="button" class="btn btn-link p-0 show-more"
+                                            th:if="${#strings.length(applicationDomainDTO.description) > 200}"
+                                            onclick="toggleDescription(this)">Show
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary"
+                                            th:data-app-domain-id="${applicationDomainDTO.id}"
+                                            th:data-app-domain-name="${applicationDomainDTO.name}"
+                                            onclick="handleAppDomainSelection(this)">
+                                        Select
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination-controls appDomains d-flex justify-content-end align-items-center mt-3">
+                            <button id="appDomainsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                    onclick="loadAppDomainsPreviousPage()" disabled>
+                                Previous
+                            </button>
+                            <span id="appDomainsCurrentPage" class="me-1">1</span>
+                            /
+                            <span id="appDomainsTotalPages" th:text="${paginatedApplicationDomainDTO.totalPages}"
+                                  class="ms-1"></span>
+                            <button id="appDomainsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                    th:data-app-domain-total-pages="${paginatedApplicationDomainDTO.totalPages}"
+                                    onclick="loadAppDomainsNextPage(this)">
+                                Next
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-        </div>
-    </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <div class="accordion-button collapsed accordion-button-active" style="cursor: default;"
+                         aria-expanded="false" aria-controls="collapseTwo">
+                        Step 3 - Select Application
+                    </div>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                     data-bs-parent="#epArtifactsDisplayAccordion">
+                    <div class="accordion-body applicationList">
+                        <p class="EpAppDomainNameText"></p>
+                        <table class="table epObjectsTable">
+                            <thead>
+                            <tr>
+                                <th>Sr. No</th>
+                                <th>Application Name</th>
+                                <th>No. of Versions</th>
+                                <th>Select</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Application rows will be dynamically populated here -->
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <button class="btn btn-secondary" onclick="goBackToStep('One')">Back</button>
+                            <div class="pagination-controls apps d-flex align-items-center">
+                                <button id="appsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                        data-direction="-1" onclick="loadAppsPage(this)" disabled>
+                                    Previous
+                                </button>
+                                <span id="appsCurrentPage" class="me-1">1</span>
+                                /
+                                <span id="appsTotalPages" class="ms-1"></span>
+                                <button id="appsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                        data-direction="1" onclick="loadAppsPage(this)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div class="row" th:if="${isUserEpTokenValidated}">
-        <div class="col-sm-4" th:if="${applicationDomainDTOList != null}">
-            <div class="container-box">
-                <h4>Step 2 - Select Application Domain</h4>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Sr. No</th>
-                        <th>Application Domain Name</th>
-                        <th>Application Domain Description</th>
-                        <th>Select</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="applicationDomainDTO, index : ${applicationDomainDTOList}">
-                        <td th:text="${index.index + 1}"></td>
-                        <td th:text="${applicationDomainDTO.name}"></td>
-                        <td th:text="${applicationDomainDTO.description}"></td>
-                        <td>
-                            <input type="radio" name="applicationDomain" th:value="${applicationDomainDTO.id}"
-                                   th:data-app-domain-id="${applicationDomainDTO.id}"
-                                   th:data-app-domain-name="${applicationDomainDTO.name}"
-                                   onclick="getAppsForAppDomainId(this)"/>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <div class="accordion-button collapsed" style="cursor: default;" aria-expanded="false"
+                         aria-controls="collapseThree">
+                        Step 4 - Select Version for SAP IS export
+                    </div>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                     data-bs-parent="#epArtifactsDisplayAccordion">
+                    <div class="accordion-body applicationVersionList">
+                        <p class="EPAppNameText"></p>
+                        <table class="table epObjectsTable">
+                            <thead>
+                            <tr>
+                                <th>Sr. No</th>
+                                <th>Version</th>
+                                <th>Version State</th>
+                                <th>Download IS artefact</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Version rows will be dynamically populated here -->
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <button class="btn btn-secondary mb-3" onclick="goBackToStep('Two')">Back</button>
+                            <div class="pagination-controls appVersions d-flex align-items-center">
+                                <button id="appVersionsPrevPageBtn" class="btn btn-primary rounded-pill me-2"
+                                        data-direction="-1" onclick="loadAppVersions(this)" disabled>
+                                    Previous
+                                </button>
+                                <span id="appVersionsCurrentPage" class="me-1">1</span>
+                                /
+                                <span id="appVersionsTotalPages" class="ms-1"></span>
+                                <button id="appVersionsNextPageBtn" class="btn btn-primary rounded-pill ms-2"
+                                        data-direction="1" onclick="loadAppVersions(this)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-        <div class="col-sm-4 applicationTable hidden">
-            <div class="container-box">
-                <h4>Step 3 - Select Application</h4>
-                <p class="EpAppDomainNameText"></p>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Sr. No</th>
-                        <th>Application Name</th>
-                        <th>No.of Versions</th>
-                        <th>Select</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="col-sm-4 applicationVersionTable hidden">
-            <div class="container-box">
-                <h4>Step 4 - Select Version for SAP IS export</h4>
-                <p class="EPAppNameText"></p>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Sr. No</th>
-                        <th>Version</th>
-                        <th>Version State</th>
-                        <th>Download IS artefact</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 </main>
-
 
 <!-- Footer -->
 <footer class="bg-dark text-light py-3">
@@ -152,8 +237,9 @@
                         <ul class="sub-menu">
                             <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/blob/master/README.md">How
                                 to use</a></li>
-                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator">Github link</a></li>
-                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/issues">Report issue</a>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator">GitHub link</a></li>
+                            <li><a href="https://github.com/SolaceLabs/sap-hub-ep-integrator/issues">Report
+                                issue</a>
                             </li>
                         </ul>
                     </li>
@@ -163,25 +249,21 @@
                     <li>Solace Developers and Community
                         <ul class="sub-menu">
                             <li><a target="_blank" rel="noopener" href="https://docs.solace.com/">Docs</a></li>
-                            <li><a target="_blank" rel="noopener" href="https://tutorials.solace.dev/">API Tutorials</a>
+                            <li><a target="_blank" rel="noopener" href="https://tutorials.solace.dev/">API
+                                Tutorials</a>
                             </li>
                             <li><a target="_blank" rel="noopener" href="https://solace.dev/">Dev Portal</a></li>
-                            <li><a target="_blank" rel="noopener" href="https://codelabs.solace.dev/">Codelabs</a></li>
+                            <li><a target="_blank" rel="noopener" href="https://codelabs.solace.dev/">Codelabs</a>
+                            </li>
                             <li><a href="https://solace.community/">Community</a></li>
                         </ul>
                     </li>
                 </div>
-
-
             </div>
-
-
         </div>
-
     </div>
 </footer>
 
-<!-- Bootstrap JS (optional, if you need JavaScript components) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

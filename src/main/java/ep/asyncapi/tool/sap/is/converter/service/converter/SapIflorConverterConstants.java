@@ -77,4 +77,64 @@ public class SapIflorConverterConstants {
             TP_TOKEN_FX_INSTANCE = ">>$$__FX_INSTANCE__$$<<",
             TP_TOKEN_VARS_JSON_PATH = ">>$$__TOPIC_VARS_JSON_PATH__$$<<\n",
             TP_TOKEN_VARS_SET_VALUE = ">>$$__TOPIC_VARS_SET_VALUE__$$<<\n";
+
+            public static final String
+            AEM_INPUT_EXC_GROOVY_HEADER = 
+                "import com.sap.gateway.ip.core.customdev.util.Message;\n" + //
+                "\n" + //
+                "",
+
+            AEM_INPUT_EXC_GROOVY_FUNCTION = 
+                "def Message inputExceptionProcess_>>$$__FX_INSTANCE__$$<<(Message message) {\n" + //
+                "\n" + //
+                "\t// get a map of iflow properties\n" + //
+                "\tdef map = message.getProperties()\n" + //
+                "\tdef refernceID = map.get(\"ReferenceId\")\t\t// ReferenceID could be an Identifier\n" + //
+                "\tdef logException = map.get(\"ExceptionLogging\")\t// Externalized parameter \"ExceptionLogging\" is set to \"True\" to log exceptions\n" + //
+                "\tdef attachID = \"\"\n" + //
+                "\tdef errordetails = \"\"\n" + //
+                "\n" + //
+                "\t// get an exception java class instance\n" + //
+                "\tdef ex = map.get(\"CamelExceptionCaught\")\n" + //
+                "\tif (ex != null) \n" + //
+                "\t{\n" + //
+                "\t\t// save the error response as a message attachment \n" + //
+                "\t\tdef messageLog = messageLogFactory.getMessageLog(message);\n" + //
+                "\t\tif (refernceID == null || refernceID == \"\" )\n" + //
+                "\t\t{\n" + //
+                "\t\t\terrordetails = \"The  replication failed because of the following error:  \" + ex.toString()\n" + //
+                "\t\t\tattachID  = \"Error Details\"\n" + //
+                "\t\t} else {\n" + //
+                "\t\t\terrordetails = \"The replication  '\" + refernceID + \"' failed because of the following error:  \" + ex.toString()\n" + //
+                "\t\t\tattachID  = \"Error Details'\" + refernceID + \"'\"\t\n" + //
+                "\t\t}\n" + //
+                "\n" + //
+                "\t\tif (logException != null && logException.equalsIgnoreCase(\"TRUE\")) \n" + //
+                "\t\t{\n" + //
+                "\t\t\tmessageLog.addAttachmentAsString(attachID, errordetails, \"text/plain\");\n" + //
+                "\t\t}\n" + //
+                "\n" + //
+                "\t\t// messageLog.addAttachmentAsString(\"Some Details\", \"These are some text details, how about that?\", \"text/plain\")\n" + //
+                "\n" + //
+                "\t\tmessageLog.setStringProperty(\"String Property 1\", \"This is some string data, which means text, doesn't it?\")\n" + //
+                "\t\tmessageLog.setStringProperty(\"String Property 2\", \"This is some string data, which means text, doesn't it?\")\n" + //
+                "\t\t\n" + //
+                "\t\tmessageLog.addCustomHeaderProperty(\"Custom Header Property 1\", \"This is custom header property number 1\")\n" + //
+                "\t\tmessageLog.addCustomHeaderProperty(\"Custom Header Property 2\", \"This is custom header property number 2\")\n" + //
+                "\n" + //
+                "\t\t// message.setProperty(\"http.ResponseBody\", errordetails.replaceAll(\"\\\\<\\\\?xml(.+?)\\\\?\\\\>\", \"\").trim());\n" + //
+                "\t\t// message.setBody(message.getBody());\n" + //
+                "\t\t// message.setProperty(\"http.StatusCode\", message.getHeaders().get(\"status\").toString()); \n" + //
+                "\t} else {\n" + //
+                "\t\tmessageLog.setProperty\n" + //
+                "\t}\n" + //
+                "\n" + //
+                "\treturn message;\n" + //
+                "}";
+
+        public static final String 
+            AEXC_TOKEN_FX_INSTANCE = ">>$$__FX_INSTANCE__$$<<";
+
+        public static final String
+            HTTP_INPUT_EXC_GROOVY_FILE_PATH = "/static/iflowdocument-template/src/main/resources/script/exceptionHandlingHttpIn.groovy";
 }

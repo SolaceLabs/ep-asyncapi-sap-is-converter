@@ -7,7 +7,7 @@ We'd love for you to contribute and welcome your help. Here are some guidelines 
 - [Feature Requests](#features)
 - [Questions](#questions)
 
-## <a name="issue"></a> Did you find a issue?
+## <a name="issue"></a> Did you find an issue?
 
 * **Ensure the bug was not already reported** by searching on GitHub under *Issues*
 
@@ -69,7 +69,7 @@ If you have not set the upstream, do so as follows:
 $ git remote add upstream https://github.com/solacecommunity/<github-repo>
 ```
 
-If you have already pushed your fork, then do not rebase. Instead merge any changes from master that are not already part of your branch.
+If you have already pushed your fork, then do not rebase. Instead, merge any changes from master that are not already part of your branch.
 
 #### Step 5: Push
 

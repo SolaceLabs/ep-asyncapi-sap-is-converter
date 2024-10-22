@@ -55,7 +55,7 @@ supporting Java applications including a local machine or server by following th
        ```
         - Build it using the command ```mvn clean install```
 2. Build ep-asyncapi-sap-is-converter tool
-    - Checkout the application code from the Solace Github
+    - Checkout the application code from the Solace GitHub
       repository: https://github.com/SolaceLabs/ep-asyncapi-sap-is-converter
     - Build the project using the command `mvn clean install`
 3. Run the ep-asyncapi-sap-is-converter tool
