@@ -10,7 +10,7 @@
     </parent>
     <groupId>ep.asyncapi.tool.sap.is</groupId>
     <artifactId>ep-asyncapi-sap-is-converter</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <name>ep-asyncapi-sap-is-converter</name>
     <description>ep-asyncapi-sap-is-converter</description>
     <properties>
@@ -67,9 +67,7 @@
         <dependency>
             <groupId>com.solace.ep.codegen</groupId>
             <artifactId>solace-ep-codegen</artifactId>
-            <version>1.1.1</version>
-            <!-- <scope>system</scope>
-            <systemPath>${basedir}/src/libs/solace/solace-ep-mule/solace-ep-muleflow-1.0.6-jar-with-dependencies.jar</systemPath> -->
+            <version>1.1.2</version>
         </dependency>
 
         <dependency>
