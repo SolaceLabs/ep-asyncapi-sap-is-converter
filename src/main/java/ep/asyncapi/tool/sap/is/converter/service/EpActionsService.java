@@ -171,6 +171,7 @@ public class EpActionsService {
             sapIFlowConverter.createIntegrationFlowFiles(integrationFlowSubDirectory, mapMuleDoc);
             //resources/script/
             sapIFlowConverter.createDynamicTopicScriptFiles(scriptSubDirectory, mapMuleDoc);
+            sapIFlowConverter.createInputExceptionScriptFile(scriptSubDirectory, mapMuleDoc);
 
             //create zip file
             final File zipFile = createZipFile(mainDirectory);

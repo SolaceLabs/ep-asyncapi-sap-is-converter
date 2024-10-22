@@ -1,6 +1,7 @@
 #<DATE_TIME_STAMP>
-composedTopic=overrideAtRuntime
+solace_password_alias=NeedToOverride
 solace_username=NeedToOverride
 solace_vpn=NeedToOverride
 solace_host=NeedToOverride
 solace_authentication_type=BASIC
+ExceptionLogging=false

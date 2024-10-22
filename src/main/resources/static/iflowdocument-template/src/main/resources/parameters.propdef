@@ -2,6 +2,15 @@
 <parameters>
   <parameter>
     <key/>
+    <name>ExceptionLogging</name>
+    <type>xsd:string</type>
+    <isRequired>false</isRequired>
+    <constraint/>
+    <description>Set this value to TRUE to enable enhanced exception logging</description>
+    <additionalMetadata/>
+  </parameter>
+  <parameter>
+    <key/>
     <name>solace_host</name>
     <type>xsd:string</type>
     <isRequired>false</isRequired>
