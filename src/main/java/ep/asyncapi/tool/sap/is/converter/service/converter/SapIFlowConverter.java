@@ -62,14 +62,15 @@ public class SapIFlowConverter {
         try {
             mapMuleDoc.getMapEgressSubFlows().forEach(mapSubFlowEgress -> {
                 final SchemaInstance schemaInstance = mapMuleDoc.getSchemaMap().get(mapSubFlowEgress.getJsonSchemaReference());
-                createAndAddSourceToDestinationFormatMmapFile(mappingSubDirectory, schemaInstance);
+                final String messageName = mapSubFlowEgress.getMessageName();
+                createAndAddSourceToDestinationFormatMmapFile(mappingSubDirectory, messageName, schemaInstance);
             });
         } catch (Exception exception) {
             log.error("Error encountered in SapIFlowConverter.createSourceToDestinationFormatMmapFiles", exception);
         }
     }
 
-    private void createAndAddSourceToDestinationFormatMmapFile(final File mappingSubDirectory, final SchemaInstance schemaInstance) {
+    private void createAndAddSourceToDestinationFormatMmapFile(final File mappingSubDirectory, final String messageName, final SchemaInstance schemaInstance) {
         try {
             final String sourceToDestinationFormatMmapFileContent = generateSourceToDestinationFormatMmapFileContent(schemaInstance);
             // final File sourceToDestinationFormatMmapFile = new File(mappingSubDirectory, messageName + "SourceToDestinationFormat.mmap");
@@ -356,7 +357,6 @@ public class SapIFlowConverter {
      * This method will create script files:
      * - composeTopic.groovy (static)
      * - topicParameters.groovy -- generated dynamically with topic parameters in code, one script function per event
-     *
      * @param scriptSubDirectory
      * @param mapMuleDoc
      */

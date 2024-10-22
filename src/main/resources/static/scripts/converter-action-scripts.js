@@ -5,7 +5,6 @@ function cancelEpForm() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-
     const errorFlag = /*[[${errorMessageFlag}]]*/ '';
     if (errorFlag === 'SESSION_EXPIRED') {
         const errorSection = document.getElementById('sessionExpiredError');
@@ -22,6 +21,10 @@ const AppDomainPagination = (function () {
         fetch(`/applicationDomains?pageNumber=${pageNumber}`)
             .then(handleErrors)
             .then(data => {
+                if (data.error === "SESSION_EXPIRED") {
+                    showSessionExpiredError();
+                    return;
+                }
                 appDomainsCurrentPage = data.currentPage;
                 populateTableForApplicationDomains('.epObjectsTable tbody', data.applicationDomainDTOList);
                 document.getElementById('appDomainsCurrentPage').textContent = appDomainsCurrentPage;
@@ -182,6 +185,10 @@ function processAppVersionListFetch(appId, appDomainId, appName, appDomainName, 
     fetch(`/${appDomainId}/applications/${appId}/versions?pageNumber=${appVersionListPageNumber}`)
         .then(handleErrors)
         .then(data => {
+            if (data.error === "SESSION_EXPIRED") {
+                showSessionExpiredError();
+                return;
+            }
             populateTableForApplicationVersions('.applicationVersionList tbody', data.applicationVersionDTOList, generateVersionRows, appName, appId, appDomainId, appDomainName);
             updateAppVersionPagination(data.totalPages, data.currentPage, appId, appDomainId, appName, appDomainName);
         })
@@ -242,7 +249,11 @@ function generateISArtefactDownload(selectedAppVersionButton) {
     fetch(`/${appDomainId}/applications/${appId}/versions/${appVersionId}/isArtefact`)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                if (response.status === 401) {
+                    showSessionExpiredError();
+                    return;
+                }
+                throw new Error(`Network response was not ok: ${response.statusText}`);
             }
             return response.blob();
         })
@@ -256,6 +267,7 @@ function generateISArtefactDownload(selectedAppVersionButton) {
             window.URL.revokeObjectURL(url);
         })
         .catch(error => {
+            showError('.applicationVersionList tbody', 'Failed to get IS artefact for the selected Application version.');
             console.error("Failed to get IS artefact for the selected Application version:", error);
         });
 }
