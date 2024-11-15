@@ -5,3 +5,4 @@ solace_vpn=NeedToOverride
 solace_host=NeedToOverride
 solace_authentication_type=BASIC
 ExceptionLogging=false
+ReferenceID=IFlow Reference ID
