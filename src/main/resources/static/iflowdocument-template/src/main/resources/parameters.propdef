@@ -11,15 +11,6 @@
   </parameter>
   <parameter>
     <key/>
-    <name>ReferenceID</name>
-    <type>xsd:string</type>
-    <isRequired>false</isRequired>
-    <constraint/>
-    <description>IFlow Reference ID to include in enhanced exception logging</description>
-    <additionalMetadata/>
-  </parameter>
-  <parameter>
-    <key/>
     <name>solace_host</name>
     <type>xsd:string</type>
     <isRequired>false</isRequired>
