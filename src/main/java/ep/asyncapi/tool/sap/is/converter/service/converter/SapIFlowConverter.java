@@ -426,34 +426,23 @@ public class SapIFlowConverter {
         }
     }
 
-    public void createInputExceptionScriptFile(final File scriptSubDirectory, MapMuleDoc mapMuleDoc) {
+    public void createInputExceptionScriptFile(final File scriptSubDirectory) {
         try {
-            if (mapMuleDoc.getMapFlows() == null || mapMuleDoc.getMapFlows().size() == 0) {
-                // There are no AEM input flows, assume HTTP input
-                final File httpInputExceptionScriptFile = new File(scriptSubDirectory, "exceptionHandlingHttpIn.groovy");
-                final String httpInputExceptionGroovyScriptContent = generateHttpInputExceptionScriptFileContent();
-                FileUtils.writeStringToFile(httpInputExceptionScriptFile, httpInputExceptionGroovyScriptContent, "UTF-8", false);
-            } else {
-                // AEM/Solace PS+ Exceptions, can have multiple input flows
-                final File aemInputExceptionScriptFile = new File(scriptSubDirectory, "exceptionHandlingIn.groovy");
-                FileUtils.writeStringToFile(aemInputExceptionScriptFile, SapIflorConverterConstants.AEM_INPUT_EXC_GROOVY_HEADER, "UTF-8", false );
-                for ( int inputChannel = 1; inputChannel <= mapMuleDoc.getMapFlows().size(); inputChannel++ ) {
-                    final String aemInputExcGroovyFx = SapIflorConverterConstants.AEM_INPUT_EXC_GROOVY_FUNCTION.replace(SapIflorConverterConstants.AEXC_TOKEN_FX_INSTANCE, Integer.toString(inputChannel));
-                    FileUtils.writeStringToFile(aemInputExceptionScriptFile, aemInputExcGroovyFx, "UTF-8", true);
-                };
-            }
+            final File inputExceptionScriptFile = new File(scriptSubDirectory, "exceptionHandlingIn.groovy");
+            final String inputExceptionGroovyScriptContent = generateInputExceptionScriptFileContent();
+            FileUtils.writeStringToFile(inputExceptionScriptFile, inputExceptionGroovyScriptContent, "UTF-8", false);
         } catch (IOException ioException) {
-            log.error("Error encountered in SapIFlowConverter.createAemInputExceptionScriptFile", ioException);
+            log.error("Error encountered in SapIFlowConverter.createInputExceptionScriptFile", ioException);
         }
     }
 
-    private String generateHttpInputExceptionScriptFileContent() {
+    private String generateInputExceptionScriptFileContent() {
         try {
-            final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.HTTP_INPUT_EXC_GROOVY_FILE_PATH);
+            final InputStream inputStream = SapIFlowConverter.class.getResourceAsStream(SapIflorConverterConstants.RESOURCES_SCRIPT_INPUT_EXC_FILE_PATH);
             String templateContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             return templateContent;
         } catch (Exception exception) {
-            log.error("Error encountered in SapIFlowConverter.generateProjectFileContent", exception);
+            log.error("Error encountered in SapIFlowConverter.generateInputExceptionScriptFileContent", exception);
             return StringUtils.EMPTY;
         }
     }
