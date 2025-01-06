@@ -20,9 +20,9 @@ def Message processData(Message message) {
     *                     Then include java stack trace in Exception Logs
     *
     *   - referenceID   - Set from message property "ReferenceID"
-	*                     A user property for reference in logs to make them
+    *                     A user property for reference in logs to make them
     *                     more informative. "ReferenceID" property must be assigned
-	*                     from message payload or another source by a developer.
+    *                     from message payload or another source by a developer.
     *                     e.g. Set to PO Number, Shipment ID, Customer ID, Message ID etc.
     */
 

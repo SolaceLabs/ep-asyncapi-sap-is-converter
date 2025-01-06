@@ -10,7 +10,7 @@
     </parent>
     <groupId>ep.asyncapi.tool.sap.is</groupId>
     <artifactId>ep-asyncapi-sap-is-converter</artifactId>
-    <version>1.0.6</version>
+    <version>1.1.0</version>
     <name>ep-asyncapi-sap-is-converter</name>
     <description>ep-asyncapi-sap-is-converter</description>
     <properties>
