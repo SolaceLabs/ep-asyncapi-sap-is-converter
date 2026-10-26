@@ -10,13 +10,17 @@
     </parent>
     <groupId>ep.asyncapi.tool.sap.is</groupId>
     <artifactId>ep-asyncapi-sap-is-converter</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>ep-asyncapi-sap-is-converter</name>
     <description>ep-asyncapi-sap-is-converter</description>
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <!-- CVE-2026-40477: override Spring Boot managed Thymeleaf (3.1.2) with patched release -->
+        <thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+        <!-- Jackson CVEs: align all Jackson modules on a patched release -->
+        <jackson-bom.version>2.21.8</jackson-bom.version>
     </properties>
 
     <developers>
@@ -92,7 +96,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.17.2</version>
+            <!-- <version>2.17.2</version> -->
         </dependency>
         <dependency>
             <groupId>org.instancio</groupId>
@@ -103,12 +107,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.2</version>
+            <!-- <version>2.17.2</version> -->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.17.2</version>
+            <!-- <version>2.17.2</version> -->
         </dependency>
         <!-- <dependency>
             <groupId>com.google.code.gson</groupId>
